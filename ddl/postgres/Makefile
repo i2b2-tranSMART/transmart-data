@@ -1,8 +1,6 @@
 include ../../makefile.inc
 
 SCHEMAS = \
-		  i2b2metadata \
-		  i2b2demodata \
 		  biomart_user \
 		  biomart \
 		  deapp \

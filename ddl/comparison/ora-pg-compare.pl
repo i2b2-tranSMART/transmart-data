@@ -19,8 +19,6 @@ use Cwd;
 	  "tm_lz" => "",
 	  "tm_wz" => "",
 	  "biomart_user" => "",
-	  "i2b2demodata" => "",
-	  "i2b2metadata" => "",
 	  "_scripts" => "",
 	  "GLOBAL" => ""
 );
@@ -70,22 +68,22 @@ use Cwd;
 
 sub oracleParsed($$){
     my ($d,$f) = @_;
-    $oparsed{$f}++; 
+    $oparsed{$f}++;
 }
 
 sub postgresParsed($$){
     my ($d,$f) = @_;
-    $pparsed{$f}++; 
+    $pparsed{$f}++;
 }
 
 sub oracleUnparsed($$){
     my ($d,$f) = @_;
-    $ounparsed{$f} .= "$d;"; 
+    $ounparsed{$f} .= "$d;";
 }
 
 sub postgresUnparsed($$){
     my ($d,$f) = @_;
-    $punparsed{$f} .= "$d;"; 
+    $punparsed{$f} .= "$d;";
 }
 
 sub parseOracleTop($$){
@@ -1401,15 +1399,15 @@ sub compareTypes($$$$){
 	    $otrigger = "--
 -- Type: TRIGGER; Owner: $s; Name: $trig
 --
-  CREATE OR REPLACE TRIGGER \"$s\".\"$trig\" 
-   before insert on \"$s\".\"$t\" 
-   for each row 
-begin  
-   if inserting then 
-      if :NEW.\"$c\" is null then 
-         select $sq.nextval into :NEW.\"$c\" from dual; 
-      end if; 
-   end if; 
+  CREATE OR REPLACE TRIGGER \"$s\".\"$trig\"
+   before insert on \"$s\".\"$t\"
+   for each row
+begin
+   if inserting then
+      if :NEW.\"$c\" is null then
+         select $sq.nextval into :NEW.\"$c\" from dual;
+      end if;
+   end if;
 end;
 /
 ALTER TRIGGER \"$s\".\"$trig\" ENABLE;
@@ -1417,7 +1415,7 @@ ALTER TRIGGER \"$s\".\"$trig\" ENABLE;
 
 	}
     }
-    if($ot eq $pt) {return 0} 
+    if($ot eq $pt) {return 0}
 
     return 1;
 }
@@ -1598,7 +1596,7 @@ ALTER TABLE \"$ts\".\"$tt\"
     $pkey=0;
     if(defined($oTableForkey{$t})){@okey = sort(split(/;/,$oTableForkey{$t}));$okey=$#okey+1}
     if(defined($pTableForkey{$t})){@pkey = sort(split(/;/,$pTableForkey{$t}));$pkey=$#pkey+1}
-    
+
     if($okey && $pkey) {
 	if($okey == $pkey) {
 	    for ($i = 0; $i < $okey; $i++) {

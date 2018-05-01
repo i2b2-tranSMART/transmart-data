@@ -13,8 +13,6 @@ BEGIN
         'deapp',
         'fmapp',
         'galaxy',
-        'i2b2demodata',
-        'i2b2metadata',
         'searchapp',
         'tm_cz',
         'tm_lz',
