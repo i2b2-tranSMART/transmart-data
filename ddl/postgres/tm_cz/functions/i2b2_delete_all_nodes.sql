@@ -20,7 +20,7 @@ CREATE FUNCTION i2b2_delete_all_nodes(path character varying, currentjobid numer
 * limitations under the License.
 ******************************************************************/
 Declare
- 
+
 	--Audit variables
 	newJobFlag		integer;
 	databaseName 	VARCHAR(100);
@@ -37,7 +37,7 @@ Begin
 	--Set Audit Parameters
 	newJobFlag := 0; -- False (Default)
 	jobID := currentJobID;
-	
+
 	databaseName := 'TM_CZ';
 	procedureName := 'I2B2_DELETE_ALL_NODES';
 
@@ -48,13 +48,13 @@ Begin
 		newJobFlag := 1; -- True
 		select tm_cz.cz_start_audit (procedureName, databaseName) into jobID;
 	END IF;
- 
+
 	if path != ''  and path != '%'
-	then 
+	then
 		-- observation_fact
 		begin
-		DELETE FROM i2b2demodata.OBSERVATION_FACT 
-		WHERE 
+		DELETE FROM i2b2demodata.OBSERVATION_FACT
+		WHERE
 		concept_cd IN (SELECT C_BASECODE FROM i2b2metadata.I2B2 WHERE C_FULLNAME LIKE PATH || '%' escape '`');
 		get diagnostics rowCt := ROW_COUNT;
 		exception
@@ -87,7 +87,7 @@ Begin
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_dimension',rowCt,stepCt,'Done') into rtnCd;
-    
+
 		--I2B2
 		begin
 		DELETE FROM i2b2metadata.i2b2
@@ -106,24 +106,6 @@ Begin
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
   
-		--i2b2_secure
-		begin
-		DELETE FROM i2b2metadata.i2b2_secure
-		WHERE C_FULLNAME LIKE PATH || '%' escape '`';
-		get diagnostics rowCt := ROW_COUNT;
-		exception
-		when others then
-			errorNumber := SQLSTATE;
-			errorMessage := SQLERRM;
-			--Handle errors.
-			select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
-			--End Proc
-			select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
-			return -16;
-		end;
-		stepCt := stepCt + 1;
-		get diagnostics rowCt := ROW_COUNT;
-		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2_secure',rowCt,stepCt,'Done') into rtnCd;
 
 		--concept_counts
 		begin
@@ -142,11 +124,10 @@ Begin
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_counts',rowCt,stepCt,'Done') into rtnCd;
-   
+
 	end if;
-	
+
 	return 1;
 END;
 
 $$;
-

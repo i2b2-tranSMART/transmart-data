@@ -1,7 +1,7 @@
 --
 -- Type: PROCEDURE; Owner: TM_CZ; Name: I2B2_DELETE_ALL_NODES
 --
-  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_DELETE_ALL_NODES" 
+  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_DELETE_ALL_NODES"
 (
   path VARCHAR2
  ,currentJobID NUMBER := null
@@ -22,7 +22,7 @@ AS
 * See the License for the specific language governing permissions and
 * limitations under the License.
 ******************************************************************/
-      
+
   --Audit variables
   newJobFlag INTEGER(1);
   databaseName VARCHAR(100);
@@ -46,59 +46,49 @@ Begin
     newJobFlag := 1; -- True
     cz_start_audit (procedureName, databaseName, jobID);
   END IF;
-    	
+
   stepCt := 0;
 
   if coalesce(path,'') = ''  or path = '%'
-	then 
-		cz_write_audit(jobId,databaseName,procedureName,'Path missing or invalid',0,stepCt,'Done'); 
-  else 
+	then
+		cz_write_audit(jobId,databaseName,procedureName,'Path missing or invalid',0,stepCt,'Done');
+  else
 		--observation_fact
-		DELETE 
-		  FROM OBSERVATION_FACT 
-		WHERE 
+		DELETE
+		  FROM OBSERVATION_FACT
+		WHERE
 		  concept_cd IN (SELECT C_BASECODE FROM I2B2 WHERE C_FULLNAME LIKE PATH || '%');
 		  stepCt := stepCt + 1;
 		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA observation_fact',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
 
 		--CONCEPT DIMENSION
-		DELETE 
+		DELETE
 		  FROM CONCEPT_DIMENSION
-		WHERE 
+		WHERE
 		  CONCEPT_PATH LIKE path || '%';
 		  stepCt := stepCt + 1;
 		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_dimension',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
-		
+
 		--I2B2
 		  DELETE
 			FROM i2b2
-		  WHERE 
+		  WHERE
 			C_FULLNAME LIKE PATH || '%';
 		  stepCt := stepCt + 1;
 		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2',SQL%ROWCOUNT,stepCt,'Done');
-		COMMIT;
-	  
-		--i2b2_secure
-		  DELETE
-			FROM i2b2_secure
-		  WHERE 
-			C_FULLNAME LIKE PATH || '%';
-		  stepCt := stepCt + 1;
-		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2_secure',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
 
 		--concept_counts
 		  DELETE
 			FROM concept_counts
-		  WHERE 
+		  WHERE
 			concept_path LIKE PATH || '%';
 		  stepCt := stepCt + 1;
 		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_counts',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
     end if;
-  
+
 END;
 /
- 

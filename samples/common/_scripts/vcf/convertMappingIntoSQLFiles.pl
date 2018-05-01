@@ -55,7 +55,7 @@ for ( $hlevel = 1; $hlevel <= $#fields; $hlevel++) {
 		print CD "insert into i2b2demodata.concept_dimension (concept_cd, concept_path, name_char, update_date, download_date, import_date, sourcesystem_cd)\n";
 		print CD "   SELECT i2b2demodata.concept_id.nextval,'$path','$name',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,null from dual\n";
 		print CD "   WHERE NOT EXISTS ( SELECT concept_path FROM i2b2demodata.concept_dimension WHERE concept_path = '$path' );\n";
-		
+
 		print IB "insert into i2b2metadata.i2b2 (c_hlevel,c_fullname,c_name,c_synonym_cd,C_VISUALATTRIBUTES,C_BASECODE,C_FACTTABLECOLUMN,C_TABLENAME,\n";
 		print IB "C_COLUMNNAME,C_COLUMNDATATYPE,C_OPERATOR,C_DIMCODE,C_COMMENT,C_TOOLTIP,UPDATE_DATE,DOWNLOAD_DATE,IMPORT_DATE,SOURCESYSTEM_CD,M_APPLIED_PATH)\n";
 		print IB "   SELECT $hlevel,'$path','$name','N','$attr', concept_cd,\n";
@@ -127,35 +127,3 @@ chomp;
 close MAPPING;
 close DE;
 close OF;
-
-open SECURE, "> $output_dir/load_i2b2_secure.sql" or die "Cannot open file: $!";
-
-print SECURE " insert into i2b2metadata.i2b2_secure
-	(c_hlevel,c_fullname,
-	c_name,c_synonym_cd,
-	C_VISUALATTRIBUTES,C_BASECODE,
-	C_FACTTABLECOLUMN,C_TABLENAME,
-	C_COLUMNNAME,C_COLUMNDATATYPE,
-	C_OPERATOR,C_DIMCODE,
-	C_COMMENT,C_TOOLTIP,
-	UPDATE_DATE,DOWNLOAD_DATE,IMPORT_DATE,
-	SOURCESYSTEM_CD,I2B2_ID,
-	M_APPLIED_PATH,SECURE_OBJ_TOKEN)
- select 
-	c_hlevel,c_fullname,
-	c_name,c_synonym_cd,
-	C_VISUALATTRIBUTES,C_BASECODE,
-	C_FACTTABLECOLUMN,C_TABLENAME,
-	C_COLUMNNAME,C_COLUMNDATATYPE,
-	C_OPERATOR,C_DIMCODE,
-	C_COMMENT,C_TOOLTIP,
-	UPDATE_DATE,DOWNLOAD_DATE,IMPORT_DATE,
-	SOURCESYSTEM_CD,null,
-	M_APPLIED_PATH,'EXP:PUBLIC'
- from 
-	i2b2metadata.i2b2 
- where 
-	c_fullname like '$path1%';
-\n";
-close SECURE;
-

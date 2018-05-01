@@ -5,7 +5,7 @@ set -e
 if [ $# -lt 2 ]
   then
     echo "No or invalid arguments supplied."
-    
+
     echo "Usage: ./load_mapping_data.sh vcf_data_dir"
     echo "    vcf_data_dir is the directory containing the parsed data from the VCF and mapping files"
     echo ""
@@ -19,7 +19,7 @@ PSQL_COMMAND=$2
 
 # List of SQL files to be loaded
 SQLFILES=( "load_concept_dimension" "load_observation_fact" \
-        "load_i2b2" "load_i2b2_secure" \
+        "load_i2b2" \
 	    "load_de_subject_sample_mapping" )
 
 # Loop through the SQL files

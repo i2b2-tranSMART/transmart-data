@@ -5500,10 +5500,6 @@
       "owner" : "I2B2METADATA",
       "name" : "I2B2"
     }, {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE"
-    }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "CZX_END_AUDIT"
@@ -9159,39 +9155,6 @@
     } ]
   }, {
     "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_SECURE"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_SECURE_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE_BK"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_SECURE_BK1"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE_BK1"
-    } ]
-  }, {
-    "child" : {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_SECURE_STUDY"
@@ -9309,17 +9272,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2"
-    } ]
-  }, {
-    "child" : {
-      "type" : "INDEX",
-      "owner" : "TM_CZ",
-      "name" : "IDX_I2B2_SECURE_FULLNAME"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE"
     } ]
   }, {
     "child" : {
@@ -10845,10 +10797,6 @@
     }, {
       "type" : "TABLE",
       "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE"
-    }, {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
       "name" : "TABLE_ACCESS"
     } ]
   }, {
@@ -10869,10 +10817,6 @@
       "type" : "TABLE",
       "owner" : "I2B2METADATA",
       "name" : "I2B2"
-    }, {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_SECURE"
     } ]
   }, {
     "child" : {

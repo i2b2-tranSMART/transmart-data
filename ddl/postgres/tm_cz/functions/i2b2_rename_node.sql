@@ -21,17 +21,17 @@ DECLARE
 * See the License for the specific language governing permissions and
 * limitations under the License.
 ******************************************************************/
-   
+
   --Audit variables
   newJobFlag integer(1);
   databaseName varchar(100);
   procedureName varchar(100);
   jobID bigint;
   stepCt bigint;
-  
+
 
 BEGIN
-	
+
   --Set Audit Parameters
   newJobFlag := 0; -- False (Default)
   jobID := currentJobID;
@@ -46,13 +46,13 @@ BEGIN
     newJobFlag := 1; -- True
     cz_start_audit (procedureName, databaseName, jobID);
   END IF;
-    	
+
   stepCt := 0;
 
-  
+
 	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Start i2b2_rename_node',0,stepCt,'Done'); 
-	
+	cz_write_audit(jobId,databaseName,procedureName,'Start i2b2_rename_node',0,stepCt,'Done');
+
   if old_node != ''  and old_node != '%' and new_node != ''  and new_node != '%'
   then
 
@@ -66,10 +66,10 @@ BEGIN
 		    where cd.sourcesystem_cd = trial_id
               and cd.concept_path like '%' || old_node || '%');
 	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update concept_counts with new path',SQL%ROWCOUNT,stepCt,'Done'); 
+	cz_write_audit(jobId,databaseName,procedureName,'Update concept_counts with new path',SQL%ROWCOUNT,stepCt,'Done');
 
     COMMIT;
-	
+
     --Update path in i2b2_tags
     update i2b2_tags t
       set path = replace(t.path, '\' || old_node || '\', '\' || new_node || '\')
@@ -78,10 +78,10 @@ BEGIN
 		    where cd.sourcesystem_cd = trial_id
               and cd.concept_path like '%\' || old_node || '\%');
 	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update i2b2_tags with new path',SQL%ROWCOUNT,stepCt,'Done'); 
+	cz_write_audit(jobId,databaseName,procedureName,'Update i2b2_tags with new path',SQL%ROWCOUNT,stepCt,'Done');
 
     COMMIT;
-	
+
     --Update specific name
     --update concept_dimension
     --  set name_char = new_node
@@ -96,7 +96,7 @@ BEGIN
 		sourcesystem_cd = trial_id
         and concept_path like '%\' || old_node || '\%';
 	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update concept_dimension with new path',SQL%ROWCOUNT,stepCt,'Done'); 
+	cz_write_audit(jobId,databaseName,procedureName,'Update concept_dimension with new path',SQL%ROWCOUNT,stepCt,'Done');
 
     COMMIT;
 
@@ -118,24 +118,12 @@ BEGIN
       where sourcesystem_cd = trial_id
         and c_fullname like '%\' || old_node || '\%';
 	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update i2b2 with new path',SQL%ROWCOUNT,stepCt,'Done'); 
+	cz_write_audit(jobId,databaseName,procedureName,'Update i2b2 with new path',SQL%ROWCOUNT,stepCt,'Done');
 
     COMMIT;
-
-	--Update i2b2_secure to match i2b2
-    --update i2b2_secure
-    --  set c_fullname = replace(c_fullname, old_node, new_node)
-	--  	 ,c_dimcode = replace(c_dimcode, old_node, new_node)
-	--	 ,c_tooltip = replace(c_tooltip, old_node, new_node)
-    --  where
-    --    c_fullname like '%' || trial_id || '%';
-    --COMMIT;
-	
-	i2b2_load_security_data(jobID);
 
 
   END IF;
 END;
- 
-$_$;
 
+$_$;

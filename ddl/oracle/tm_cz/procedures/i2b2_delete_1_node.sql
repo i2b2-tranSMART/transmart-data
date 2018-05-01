@@ -1,7 +1,7 @@
 --
 -- Type: PROCEDURE; Owner: TM_CZ; Name: I2B2_DELETE_1_NODE
 --
-  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_DELETE_1_NODE" 
+  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_DELETE_1_NODE"
 (
   path VARCHAR2
  ,currentJobID NUMBER := null
@@ -45,59 +45,50 @@ begin
     newJobFlag := 1; -- True
     czx_start_audit (procedureName, databaseName, jobID);
   END IF;
-    	
-  stepCt := 0;  
+
+  stepCt := 0;
   if coalesce(path,'') = ''  or path = '%'
-	then 
-		czx_write_audit(jobId,databaseName,procedureName,'Path missing or invalid',0,stepCt,'Done'); 
+	then
+		czx_write_audit(jobId,databaseName,procedureName,'Path missing or invalid',0,stepCt,'Done');
   else
     --I2B2
-    DELETE 
-      FROM OBSERVATION_FACT 
-    WHERE 
+    DELETE
+      FROM OBSERVATION_FACT
+    WHERE
       concept_cd IN (SELECT C_BASECODE FROM I2B2 WHERE C_FULLNAME = PATH);
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2DEMODATA observation_fact',SQL%ROWCOUNT,stepCt,'Done');
     COMMIT;
 
       --CONCEPT DIMENSION
-    DELETE 
+    DELETE
       FROM CONCEPT_DIMENSION
-    WHERE 
+    WHERE
       CONCEPT_PATH = path;
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2DEMODATA concept_dimension',SQL%ROWCOUNT,stepCt,'Done');
     COMMIT;
-    
+
       --I2B2
       DELETE
         FROM i2b2
-      WHERE 
+      WHERE
         C_FULLNAME = PATH;
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2METADATA i2b2',SQL%ROWCOUNT,stepCt,'Done');
     COMMIT;
 
-  --i2b2_secure
-      DELETE
-        FROM i2b2_secure
-      WHERE 
-        C_FULLNAME = PATH;
-	stepCt := stepCt + 1;
-	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2METADATA i2b2_secure',SQL%ROWCOUNT,stepCt,'Done');
-    COMMIT;
-
   --concept_counts
       DELETE
         FROM concept_counts
-      WHERE 
+      WHERE
         concept_path = PATH;
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2DEMODATA concept_counts',SQL%ROWCOUNT,stepCt,'Done');
     COMMIT;
 
   END IF;
-  
+
     ---Cleanup OVERALL JOB if this proc is being run standalone
   IF newJobFlag = 1
   THEN
@@ -109,9 +100,8 @@ begin
     --Handle errors.
     czx_error_handler (jobID, procedureName);
     --End Proc
-    czx_end_audit (jobID, 'FAIL');    
+    czx_end_audit (jobID, 'FAIL');
 END;
 
- 
+
 /
- 

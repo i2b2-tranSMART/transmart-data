@@ -279,10 +279,6 @@ BEGIN
 	cz_write_audit(jobId,databaseName,procedureName,'Delete trial from search_secure_object',SQL%ROWCOUNT,stepCt,'Done');
 	commit;
 
-	--	reload i2b2_secure
-
-	i2b2_load_security_data(jobId);
-
   end if;
 
     ---Cleanup OVERALL JOB if this proc is being run standalone
