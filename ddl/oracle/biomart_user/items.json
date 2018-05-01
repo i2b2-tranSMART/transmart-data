@@ -3930,17 +3930,6 @@
     "child" : {
       "type" : "SYNONYM",
       "owner" : "BIOMART_USER",
-      "name" : "PATIENT_TRIAL"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "PATIENT_TRIAL"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "BIOMART_USER",
       "name" : "PLUGIN"
     },
     "parents" : [ {

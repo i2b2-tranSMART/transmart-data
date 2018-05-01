@@ -3688,10 +3688,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "PATIENT_DIMENSION"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "PATIENT_TRIAL"
     } ]
   }, {
     "child" : {
@@ -3801,10 +3797,6 @@
       "name" : "OBSERVATION_FACT"
     }, {
       "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "PATIENT_TRIAL"
-    }, {
-      "type" : "TABLE",
       "owner" : "I2B2METADATA",
       "name" : "I2B2"
     }, {
@@ -3835,10 +3827,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "PATIENT_DIMENSION"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "PATIENT_TRIAL"
     } ]
   }, {
     "child" : {
@@ -3856,10 +3844,6 @@
       "name" : "OBSERVATION_FACT"
     }, {
       "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "PATIENT_TRIAL"
-    }, {
-      "type" : "TABLE",
       "owner" : "I2B2METADATA",
       "name" : "I2B2"
     }, {
@@ -3894,10 +3878,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "PATIENT_DIMENSION"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "PATIENT_TRIAL"
     } ]
   }, {
     "child" : {
@@ -10408,17 +10388,6 @@
       "type" : "TABLE",
       "owner" : "I2B2DEMODATA",
       "name" : "PATIENT_MAPPING"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "PATIENT_TRIAL"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "PATIENT_TRIAL"
     } ]
   }, {
     "child" : {

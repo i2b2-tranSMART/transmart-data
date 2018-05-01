@@ -43,14 +43,14 @@ Declare
 BEGIN
 
 	stepCt := 0;
-	
+
 	--Set Audit Parameters
 	newJobFlag := 0; -- False (Default)
 	jobId := currentjobId;
 
 	databaseName := 'TM_CZ';
 	procedureName := 'i2b2_backout_trial';
-	
+
 	--Audit JOB Initialization
 	--If Job ID does not exist, then this is a single procedure run and we need to create it
 	IF(jobId IS NULL or jobId < 1)
@@ -85,7 +85,7 @@ BEGIN
 	then
 		auditMessage := 'The use of the path_string argument for this stored procedure (i2b2_backout_trial) is deprecated';
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,auditMessage,rowCt,stepCt,'Done') into rtnCd;
-	end if;	
+	end if;
 
 	-- retrieve topNode for study with given trial id (trialid)
 	begin
@@ -142,11 +142,11 @@ BEGIN
 		auditMessage := 'Start deleting all data for trial ' || trialid || ' and topNode ' || topNode;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,auditMessage,rowCt,stepCt,'Done') into rtnCd;
 
-		select tm_cz.i2b2_delete_all_nodes(topNode,jobId) into rtnCd;	
+		select tm_cz.i2b2_delete_all_nodes(topNode,jobId) into rtnCd;
 	end if;
 
 	--	delete clinical data
-	
+
 	begin
 	delete from tm_lz.lz_src_clinical_data
 	where study_id = trialid;
@@ -165,7 +165,7 @@ BEGIN
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from lz_src_clinical_data',rowCt,stepCt,'Done') into rtnCd;
 
 	--	delete observation_fact SECURITY data, do before patient_dimension delete
-	
+
 	begin
 	delete from i2b2demodata.observation_fact f
 	where f.concept_cd = 'SECURITY'
@@ -187,7 +187,7 @@ BEGIN
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete SECURITY data for trial from I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
 
 	--	delete patient data
-	
+
 	begin
 	delete from i2b2demodata.patient_dimension
 	where sourcesystem_cd like trialid || ':%';
@@ -205,25 +205,8 @@ BEGIN
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA patient_dimension',rowCt,stepCt,'Done') into rtnCd;
 
-	begin
-	delete from i2b2demodata.patient_trial
-	where trial=  trialid;
-	get diagnostics rowCt := ROW_COUNT;
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		--Handle errors.
-		select tm_cz.cz_error_handler (jobId, procedureName, errorNumber, errorMessage) into rtnCd;
-		--End Proc
-		select tm_cz.cz_end_audit (jobId, 'FAIL') into rtnCd;
-		return -16;
-	end;
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA patient_trial',rowCt,stepCt,'Done') into rtnCd;
-
 --	delete gene expression data
-	
+
 	select count(*) into pExists
 	from deapp.de_subject_sample_mapping
 	where trial_name = TrialId
@@ -245,7 +228,7 @@ BEGIN
 			stepCt := stepCt + 1;
 			select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Drop partition table for de_subject_microarray_data',rowCt,stepCt,'Done') into rtnCd;
 		end loop;
-		
+
 		begin
 		delete from deapp.de_subject_sample_mapping
 		where trial_name = TrialID
@@ -263,11 +246,11 @@ BEGIN
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
-		
+
 	end if;
-	
+
 	--	delete acgh data
-	
+
 	select count(*) into pExists
 	from deapp.de_subject_sample_mapping
 	where trial_name = TrialId
@@ -289,7 +272,7 @@ BEGIN
 			stepCt := stepCt + 1;
 			select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Drop partition table for de_subject_acgh_data',rowCt,stepCt,'Done') into rtnCd;
 		end loop;
-		
+
 		begin
 		delete from deapp.de_subject_sample_mapping
 		where trial_name = TrialID
@@ -307,11 +290,11 @@ BEGIN
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
-		
+
 	end if;
 
 	--	delete rnaseq data
-	
+
 	select count(*) into pExists
 	from deapp.de_subject_sample_mapping
 	where trial_name = TrialId
@@ -332,7 +315,7 @@ BEGIN
 			stepCt := stepCt + 1;
 			select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Drop partition table for de_subject_rnaseq_data',rowCt,stepCt,'Done') into rtnCd;
 		end loop;
-		
+
 		begin
 		delete from deapp.de_subject_sample_mapping
 		where trial_name = TrialID
@@ -350,7 +333,7 @@ BEGIN
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
-		
+
 	end if;
 
 	-- delete from search_secure_object
@@ -393,7 +376,7 @@ BEGIN
 	END IF;
 
 	return 1;
-	
+
 EXCEPTION
 WHEN OTHERS THEN
 	errorNumber := SQLSTATE;
@@ -406,4 +389,3 @@ WHEN OTHERS THEN
 END;
 
 $$;
-
