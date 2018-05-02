@@ -3570,10 +3570,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "OBSERVATION_FACT"
@@ -3668,10 +3664,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_DELETE_ALL_NODES"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
@@ -4203,10 +4195,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_ID_SEQ"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
       "name" : "IS_DATE"
@@ -4353,10 +4341,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2_ID_SEQ"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
@@ -4509,10 +4493,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_ID_SEQ"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
       "name" : "IS_DATE"
@@ -4651,10 +4631,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2_ID_SEQ"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
@@ -5261,10 +5237,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_RBM_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -5396,10 +5368,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_RBM_INC_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -5484,45 +5452,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "LZ_SRC_SAMPLE_CATEGORIES"
-    } ]
-  }, {
-    "child" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "CONCEPT_DIMENSION"
-    }, {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZX_END_AUDIT"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZX_ERROR_HANDLER"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZX_START_AUDIT"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZX_WRITE_AUDIT"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_ID_SEQ"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "OBSERVATION_FACT"
     } ]
   }, {
     "child" : {
@@ -6073,10 +6002,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
       "name" : "PARSE_NTH_VALUE"
@@ -6308,10 +6233,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "LT_SRC_MRNA_SUBJ_SAMP_MAP"
@@ -6434,10 +6355,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -6576,10 +6493,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_MIRNA_INC_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -6711,10 +6624,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_MRNA_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -6842,10 +6751,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_MRNA_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -6970,10 +6875,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7108,10 +7009,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_MRNA_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -7236,10 +7133,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7374,10 +7267,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_PROTEOMICS_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -7506,10 +7395,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7650,10 +7535,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "LT_SRC_MRNA_SUBJ_SAMP_MAP"
@@ -7768,10 +7649,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7898,10 +7775,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_RNA_SEQ_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -8010,10 +7883,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -8156,10 +8025,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_MRNA_ZSCORE_CALC"
     }, {
       "type" : "SYNONYM",
@@ -8288,10 +8153,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_FILL_IN_TREE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -8915,10 +8776,6 @@
       "owner" : "TM_CZ",
       "name" : "I2B2"
     }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2_TAGS"
@@ -9191,10 +9048,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
     }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
@@ -13795,13 +13648,6 @@
       "name" : "I2B2_LOAD_SAMPLE_CATEGORIES"
     },
     "file" : "tm_cz/procedures/i2b2_load_sample_categories.sql"
-  }, {
-    "item" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_LOAD_SECURITY_DATA"
-    },
-    "file" : "tm_cz/procedures/i2b2_load_security_data.sql"
   }, {
     "item" : {
       "type" : "PROCEDURE",
