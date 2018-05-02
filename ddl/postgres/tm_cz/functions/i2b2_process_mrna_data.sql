@@ -766,7 +766,7 @@ BEGIN
 			select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 			return -16;
 		end;
-		
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Update existing data in de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 	pCount := rowCt;	--	set counter to check that all subject_sample mapping records were added/updated
@@ -903,9 +903,9 @@ BEGIN
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert trial into DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 	pCount := pCount + rowCt;
-	
+
 	--	check if all records from lt_src_mrna_subj_samp_map were added/updated
-	
+
 	if sCount <> pCount then
 	stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Not all records in lt_src_mrna_subj_samp_map inserted/updated in de_subject_sample_mapping',0,stepCt,'Done') into rtnCd;
@@ -966,7 +966,7 @@ BEGIN
 	update i2b2metadata.i2b2 t
 	set c_columndatatype = 'T'
 	   ,c_metadataxml = null
-	   ,c_visualattributes=case when upd.node_type = 0 then 'LAH' else 'FA' end  
+	   ,c_visualattributes=case when upd.node_type = 0 then 'LAH' else 'FA' end
 	from upd
 	where t.c_basecode = upd.concept_cd;
 	get diagnostics rowCt := ROW_COUNT;
@@ -986,7 +986,7 @@ BEGIN
         update i2b2metadata.i2b2 a
 	set c_visualattributes='FAS'
         where a.c_fullname = substr(topNode,1,instr(topNode,'\',1,3));
-        
+
         stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study nodes in I2B2METADATA i2b2',RowCt,stepCt,'Done') into rtnCd;
 
@@ -1011,12 +1011,6 @@ BEGIN
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,tText,0,stepCt,'Done') into rtnCd;
 
 	END LOOP;
-
-	--Reload Security: Inserts one record for every I2B2 record into the security table
-
-    select tm_cz.i2b2_load_security_data(jobId) into rtnCd;
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done') into rtnCd;
 
 	--	tag data with probeset_id from reference.
 
@@ -1072,13 +1066,13 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end if;
-	
+
 	--	add partition if it doesn't exist, drop indexes and truncate if it does (reload)
 
 	select count(*) into pExists
 	from information_schema.tables
 	where table_name = partitionindx;
-	
+
 	if pExists = 0 then
 		sqlText := 'create table ' || partitionName || ' ( constraint mrna_' || partitionId::text || '_check check ( partition_id = ' || partitionId::text ||
 					')) inherits (deapp.de_subject_microarray_data)';
@@ -1148,7 +1142,7 @@ BEGIN
 		select probeset_id
 			  ,assay_id
               ,patient_id
-			  ,case when dataType = 'R' then intensity_value else 
+			  ,case when dataType = 'R' then intensity_value else
 				    case when logBase = -1 then 0 else power(logBase::double precision, intensity_value::double precision) end
 			   end
 			  ,case when dataType = 'L' then intensity_value else ln(intensity_value::double precision) / ln(logBase::double precision) end
@@ -1251,4 +1245,3 @@ BEGIN
 END;
 
 $$;
-

@@ -3,7 +3,7 @@
 --
 
 CREATE FUNCTION tm_cz.i2b2_process_rnaseq_data(trial_id character varying, top_node character varying, source_cd character varying DEFAULT 'STD'::character varying, secure_study character varying DEFAULT 'N'::character varying, data_type character varying DEFAULT 'R'::character varying, log_base numeric DEFAULT 2, currentjobid numeric DEFAULT (-1))
-  RETURNS numeric 
+  RETURNS numeric
   LANGUAGE plpgsql SECURITY DEFINER
   AS $$
 
@@ -945,7 +945,7 @@ BEGIN
 		select tm_cz.cz_error_handler (jobID, procedureName, '-1', 'Application raised error') into rtnCd;
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
-	end if;	
+	end if;
 	--	Insert records for subjects into observation_fact
 
 	begin
@@ -1005,7 +1005,7 @@ BEGIN
 	update i2b2metadata.i2b2 t
 	set c_columndatatype = 'T'
 	   ,c_metadataxml = null
-	   ,c_visualattributes=case when upd.node_type = 0 then 'LAH' else 'FA' end  
+	   ,c_visualattributes=case when upd.node_type = 0 then 'LAH' else 'FA' end
 	from upd
 	where t.c_basecode = upd.concept_cd;
 	get diagnostics rowCt := ROW_COUNT;
@@ -1043,12 +1043,6 @@ BEGIN
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,tText,0,stepCt,'Done') into rtnCd;
 
 	END LOOP;
-
-	--Reload Security: Inserts one record for every I2B2 record into the security table
-
-	select tm_cz.i2b2_load_security_data(jobId) into rtnCd;
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done') into rtnCd;
 
 	--	tag data with probeset_id from reference.probeset_deapp
 
@@ -1187,9 +1181,9 @@ BEGIN
 			   else case when logBase = -1 then 0 else power(logBase,normalized_readcount) end
 			 end
 			,case when dataType = 'L' then normalized_readcount else log(logBase,normalized_readcount::numeric) end
-			,patient_id 
+			,patient_id
 			,trial_name
-		from tm_wz.wt_subject_rnaseq_region;		
+		from tm_wz.wt_subject_rnaseq_region;
 		get diagnostics rowCt := ROW_COUNT;
 		exception
 		when others then
@@ -1290,5 +1284,3 @@ BEGIN
 END;
 
 $$;
-
-

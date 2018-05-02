@@ -16,7 +16,7 @@ DECLARE
 
 --		tissue_type	=>	sample_type
 --		attribute_1	=>	tissue_type
---		atrribute_2	=>	timepoint	
+--		atrribute_2	=>	timepoint
 
   TrialID		varchar(100);
   RootNode		varchar(2000);
@@ -45,7 +45,7 @@ DECLARE
    partitioniD	numeric(18,0);
   partitionName	varchar(100);
   partitionIndx	varchar(100);
-  
+
     --Audit variables
   newJobFlag integer;
   databaseName varchar(100);
@@ -56,7 +56,7 @@ DECLARE
   errorNumber		character varying;
   errorMessage	character varying;
   rtnCd			integer;
- 
+
 	addNodes CURSOR FOR
 	SELECT distinct t.leaf_node
           ,t.node_name
@@ -65,11 +65,11 @@ DECLARE
 		 (select 1 from i2b2metadata.i2b2 x
 		  where t.leaf_node = x.c_fullname);
 
- 
+
 --	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
 
   delNodes CURSOR FOR
-  SELECT distinct c_fullname 
+  SELECT distinct c_fullname
   from  i2b2metadata.i2b2
   where c_fullname like topNode || '%'
     and substring(c_visualattributes from 2 for 1) = 'H';
@@ -82,14 +82,14 @@ DECLARE
 BEGIN
 	TrialID := upper(trial_id);
 	secureStudy := upper(secure_study);
-	
+
 	if (secureStudy not in ('Y','N') ) then
 		secureStudy := 'Y';
 	end if;
-	
+
 	topNode := REGEXP_REPLACE('\' || top_node || '\','(\\){2,}', '\','g');
 	select length(topNode)-length(replace(topNode,'\','')) into topLevel ;
-	
+
 	if coalesce(data_type::text, '') = '' then
 		dataType := 'R';
 	else
@@ -99,7 +99,7 @@ BEGIN
 			dataType := 'R';
 		end if;
 	end if;
-	
+
 	logBase := log_base;
 	sourceCd := upper(coalesce(source_code,'STD'));
 
@@ -117,79 +117,79 @@ BEGIN
     newJobFlag := 1; -- True
     select cz_start_audit (procedureName, databaseName, jobID) into jobId;
   END IF;
-    	
+
 	stepCt := 0;
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Starting i2b2_process_RNA_SEQ_data',0,stepCt,'Done') into rtnCd;
-	
+
 	--	Get count of records in lt_src_RNA_SEQ_subj_samp_map
-	
+
 	select count(*) into sCount
 	from tm_lz.lt_src_RNA_SEQ_subj_samp_map;
-	
+
 	--	check if all subject_sample map records have a platform, If not, abort run
-	
+
 	select count(*) into pCount
 	from tm_lz.lt_src_RNA_SEQ_subj_samp_map
 	where coalesce(platform::text, '') = '';
-	
+
 	if pCount > 0 then
 		select cz_write_audit(jobId,databasename,procedurename,'Platform data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 161;
 	end if;
-  	
+
 	--	check if all subject_sample map records have a tissue_type, If not, abort run
-	
+
 	select count(*) into pCount
 	from tm_lz.lt_src_RNA_SEQ_subj_samp_map
 	where coalesce(tissue_type::text, '') = '';
-	
+
 	if pCount > 0 then
 		select cz_write_audit(jobId,databasename,procedurename,'Tissue Type data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select CZ_END_AUDIT (JOBID,'FAIL') into rtnCd;
 		return 162;
 	end if;
-	
+
 	--	check if there are multiple platforms, if yes, then platform must be supplied in lt_src_RNA_SEQ_data
-	
+
 	select count(*) into pCount
 	from (select sample_cd
 		  from tm_lz.lt_src_RNA_SEQ_subj_samp_map
 		  group by sample_cd
 		  having count(distinct platform) > 1) as x;
-	
+
 	if pCount > 0 then
 		select cz_write_audit(jobId,databasename,procedurename,'Multiple platforms for sample_cd in lt_src_RNA_SEQ_subj_samp_map',1,stepCt,'ERROR') into rtnCd;
 		select CZ_ERROR_HANDLER(JOBID,PROCEDURENAME) into rtnCd;
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 164;
 	end if;
-		
+
 	-- Get root_node from topNode
-  
+
 	select parse_nth_value(topNode, 2, '\') into RootNode ;
-	
+
 	select count(*) into pExists
 	from i2b2metadata.table_access
 	where c_name = rootNode;
-	
+
 	if pExists = 0 then
 		perform i2b2_add_root_node(rootNode, jobId);
 	end if;
-	
+
 	select c_hlevel into root_level
 	from i2b2metadata.i2b2
 	where c_name = RootNode;
-	
+
 	-- Get study name from topNode
-  
+
 	select parse_nth_value(topNode, topLevel, '\') into study_name ;
-	
+
 	--	Add any upper level nodes as needed
-	
+
 	tPath := REGEXP_REPLACE(replace(top_node,study_name,''),'(\\){2,}', '\', 'g');
 	select length(tPath) - length(replace(tPath,'\','')) into pCount ;
 
@@ -219,7 +219,7 @@ BEGIN
 	and coalesce(sm.source_cd,'STD') = sourceCd
 	and sm.platform = 'RNA_AFFYMETRIX'
 	and sm.partition_id is not null;
-	
+
 	if partExists = 0 then
 		select nextval('deapp.seq_rna_partition_id') into partitionId;
 	else
@@ -231,13 +231,13 @@ BEGIN
 	end if;
 
 	partitionName := 'deapp.de_subject_rna_data_' || partitionId::text;
-	partitionIndx := 'de_subject_rna_data_' || partitionId::text;	
+	partitionIndx := 'de_subject_rna_data_' || partitionId::text;
 	stepCt := stepCt + 1;
-	select cz_write_audit(jobId,databaseName,procedureName,'Uppercase trial_name in lt_src_RNA_SEQ_subj_samp_map',rowCt,stepCt,'Done') into rtnCd;	
-	
+	select cz_write_audit(jobId,databaseName,procedureName,'Uppercase trial_name in lt_src_RNA_SEQ_subj_samp_map',rowCt,stepCt,'Done') into rtnCd;
+
 	--	create records in patient_dimension for subject_ids if they do not exist
 	--	format of sourcesystem_cd:  trial:[site:]subject_cd
-	
+
 	begin
 	insert into i2b2demodata.patient_dimension
     ( patient_num,
@@ -267,7 +267,7 @@ BEGIN
 		   and s.source_cd = sourceCD
 		   and not exists
 			  (select 1 from i2b2demodata.patient_dimension x
-			   where x.sourcesystem_cd = 
+			   where x.sourcesystem_cd =
 				 regexp_replace(TrialID || ':' || coalesce(s.site_id, '') || ':' || s.subject_id,'(::){1,}', ':'))
 		) as x;
 	get diagnostics rowCt := ROW_COUNT;
@@ -281,10 +281,10 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert subjects to patient_dimension',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	perform i2b2_create_security_for_trial(TrialId, secureStudy, jobID);
 
 	--	Delete existing observation_fact data, will be repopulated
@@ -307,15 +307,15 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete data from observation_fact',rowCt,stepCt,'Done') into rtnCd;
-		
-	--	Cleanup any existing data in de_subject_sample_mapping.  
+
+	--	Cleanup any existing data in de_subject_sample_mapping.
 
 	begin
-	delete from deapp.DE_SUBJECT_SAMPLE_MAPPING 
-	where trial_name = TrialID 
+	delete from deapp.DE_SUBJECT_SAMPLE_MAPPING
+	where trial_name = TrialID
 	  and coalesce(source_cd,'STD') = sourceCd
 	  and platform = 'RNA_AFFYMETRIX'; --Making sure only RNA_sequencing data is deleted
 	get diagnostics rowCt := ROW_COUNT;
@@ -329,14 +329,14 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 
 --	truncate tmp node table
 
 	EXECUTE('truncate table tm_wz.wt_RNA_SEQ_nodes');
-	
+
 --	load temp table with leaf node path, use temp table with distinct sample_type, ATTR2, platform, and title   this was faster than doing subselect
 --	from wt_subject_RNA_sequencing_data
 
@@ -371,10 +371,10 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert node values into DEAPP wt_RNA_SEQ_node_values',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	begin
 	insert into tm_wz.wt_RNA_SEQ_nodes
 	(leaf_node
@@ -405,10 +405,10 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create leaf nodes in DEAPP tmp_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	insert for platform node so platform concept can be populated
 		begin
 	insert into tm_wz.wt_RNA_SEQ_nodes
@@ -440,10 +440,10 @@ BEGIN
 		--End Proc
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
-	end;		   
+	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create platform nodes in wt_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	insert for ATTR1 node so ATTR1 concept can be populated in tissue_type_cd
 	begin
 	insert into tm_wz.wt_RNA_SEQ_nodes
@@ -480,7 +480,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR1 nodes in wt_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	insert for ATTR2 node so ATTR2 concept can be populated in timepoint_cd
 	begin
 	insert into tm_wz.wt_RNA_SEQ_nodes
@@ -515,11 +515,11 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in wt_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-	
-	--	insert for tissue_type node so sample_type_cd can be populated 
+
+	--	insert for tissue_type node so sample_type_cd can be populated
 	begin
 	insert into tm_wz.wt_RNA_SEQ_nodes
 	(leaf_node
@@ -554,7 +554,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in wt_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-				
+
 	begin
 	update tm_wz.wt_RNA_SEQ_nodes
 	set node_name=tm_cz.parse_nth_value(leaf_node,length(leaf_node)-length(replace(leaf_node,'\','')),'\');
@@ -571,7 +571,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Updated node_name in DEAPP tmp_RNA_SEQ_nodes',rowCt,stepCt,'Done') into rtnCd;
-		
+
 --	add leaf nodes for RNA_sequencing data  The cursor will only add nodes that do not already exist.
 
 	 FOR r_addNodes in addNodes Loop
@@ -592,13 +592,13 @@ BEGIN
 	end;
 		stepCt := stepCt + 1;
 		tText := 'Added Leaf Node: ' || r_addNodes.leaf_node || '  Name: ' || r_addNodes.node_name;
-		
+
 		select cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
-		
+
 		perform i2b2_fill_in_tree(TrialId, r_addNodes.leaf_node, jobID);
 
-	END LOOP;  
-	
+	END LOOP;
+
 --	update concept_cd for nodes, this is done to make the next insert easier
 	begin
 	update tm_wz.wt_RNA_SEQ_nodes t
@@ -646,7 +646,7 @@ BEGIN
   --SAMPLE_ID		= id of sample (trial:S:[site_id]:subject_id:sample_cd) from patient_dimension, may be the same as patient_num
   --SAMPLE_CD		= sample_cd
   --SOURCE_CD		= sourceCd
-  
+
   --ASSAY_ID        = generated by trigger
 	begin
 	insert into deapp.de_subject_sample_mapping(
@@ -721,7 +721,7 @@ BEGIN
 			  ,a.source_cd
 			  ,TrialId as omic_source_study
 			  ,b.patient_num as omic_patient_id
-		from tm_lz.lt_src_RNA_SEQ_subj_samp_map a		
+		from tm_lz.lt_src_RNA_SEQ_subj_samp_map a
 		--Joining to Pat_dim to ensure the ID's match. If not I2B2 won't work.
 		inner join i2b2demodata.patient_dimension b
 		  on regexp_replace(TrialID || ':' || coalesce(a.site_id,'') || ':' || a.subject_id,'(::){1,}', ':', 'g') = b.sourcesystem_cd
@@ -736,25 +736,25 @@ BEGIN
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(pn.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(pn.attribute_1,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(pn.attribute_2,'@')
-			and pn.node_type = 'PLATFORM'	  
+			and pn.node_type = 'PLATFORM'
 		left outer join tm_wz.wt_RNA_SEQ_nodes ttp
 			on a.tissue_type = ttp.tissue_type
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'PLATFORM') > 1 then a.platform else '@' end = coalesce(ttp.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(ttp.attribute_1,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(ttp.attribute_2,'@')
-			and ttp.node_type = 'TISSUETYPE'		  
+			and ttp.node_type = 'TISSUETYPE'
 		left outer join tm_wz.wt_RNA_SEQ_nodes a1
 			on a.attribute_1 = a1.attribute_1
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a1.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a1.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(a1.attribute_2,'@')
-			and a1.node_type = 'ATTR1'		  
+			and a1.node_type = 'ATTR1'
 		left outer join tm_wz.wt_RNA_SEQ_nodes a2
 			on a.attribute_2 = a1.attribute_2
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a2.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a2.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(a2.attribute_1,'@')
-			and a2.node_type = 'ATTR2'			  
+			and a2.node_type = 'ATTR2'
 		left outer join i2b2demodata.patient_dimension sid
 			on regexp_replace(TrialID || ':' || coalesce(a.site_id,'') || ':' || a.subject_id,'(::){1,}', ':','g') = sid.sourcesystem_cd
 		where a.trial_name = TrialID
@@ -803,7 +803,7 @@ BEGIN
 		  ,'' -- no units available
                   ,1
     from  deapp.de_subject_sample_mapping m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCD
       and m.platform = 'RNA_AFFYMETRIX';
 	  get diagnostics rowCt := ROW_COUNT;
@@ -819,8 +819,8 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert patient facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
-  
-	--	Insert sample facts 
+
+	--	Insert sample facts
 	begin
 	insert into i2b2demodata.observation_fact
     (patient_num
@@ -849,7 +849,7 @@ BEGIN
 		  ,'' -- no units available
                   ,1
     from  deapp.de_subject_sample_mapping m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCd
       and m.platform = 'RNA_AFFYMETRIX'
 	  and m.patient_id != m.sample_id;
@@ -866,7 +866,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert sample facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
-    
+
 	--Update I2b2 for correct data type
     begin
 
@@ -886,7 +886,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
     select cz_write_audit(jobId,databaseName,procedureName,'Initialize data_type and xml in i2b2',rowCt,stepCt,'Done') into rtnCd;
-    
+
  ---INSERT sample_dimension
 	begin
       INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
@@ -923,7 +923,7 @@ BEGIN
                 <New /></Analysis>'||(select xmlelement(name "SeriesMeta",xmlforest(m.display_value as "Value",m.display_unit as "Unit",m.display_label as "DisplayName")) as hi
       from tm_lz.lt_src_rna_display_mapping m where m.category_cd=ul.category_cd)||
                 '</ValueMetadata>') where n.c_fullname=(select leaf_node from tm_wz.wt_RNA_SEQ_nodes where category_cd=ul.category_cd and leaf_node=n.c_fullname);
-                
+
                 end loop;
          get diagnostics rowCt := ROW_COUNT;
 	exception
@@ -958,10 +958,10 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-      
-    stepCt := stepCt + 1; 
+
+    stepCt := stepCt + 1;
     select cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for leaf nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
- 
+
 	begin
         update i2b2metadata.i2b2 a
     set c_visualattributes='FAS'
@@ -977,19 +977,19 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	stepCt := stepCt + 1; 
+	stepCt := stepCt + 1;
     select cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study node in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	begin
    insert into probeset_deapp
    (
    probeset,
-   platform 
+   platform
    )select distinct s.probeset
-               ,m.platform               
+               ,m.platform
             from tm_lz.lt_src_rna_seq_data s,
-                 tm_lz.lt_src_RNA_SEQ_subj_samp_map m  
-                 where s.trial_name=m.trial_name  
+                 tm_lz.lt_src_RNA_SEQ_subj_samp_map m
+                 where s.trial_name=m.trial_name
                    and not exists
 		 (select 1 from probeset_deapp x
 		  where m.platform = x.platform
@@ -1007,7 +1007,7 @@ BEGIN
 	end;
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert new probesets into probeset_deapp',rowCt,stepCt,'Done') into rtnCd;
-        
+
   --Build concept Counts
   --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
   -- a unique top-level node for RNA_sequencing data
@@ -1026,7 +1026,7 @@ BEGIN
 	end;
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	delete each node that is hidden
 	 FOR r_delNodes in delNodes Loop
 
@@ -1046,32 +1046,15 @@ BEGIN
 	end;
 		stepCt := stepCt + 1;
 		tText := 'Deleted node: ' || r_delNodes.c_fullname;
-		
+
 		select cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
 
-	END LOOP;  	
-
-  --Reload Security: Inserts one record for every I2B2 record into the security table
-	begin
-    perform i2b2_load_security_data(jobId);
-	get diagnostics rowCt := ROW_COUNT;
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		--Handle errors.
-		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
-		--End Proc
-		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
-		return -16;
-	end;
-	stepCt := stepCt + 1;
-	select cz_write_audit(jobId,databaseName,procedureName,'Load security data',rowCt,stepCt,'Done') into rtnCd;
+	END LOOP;
 
 --	tag data with probeset_id from reference.probeset_deapp
-  
+
 	EXECUTE ('truncate table tm_wz.wt_subject_rna_probeset');
-	
+
 	--	note: assay_id represents a unique subject/site/sample
 	begin
 	insert into tm_wz.wt_subject_rna_probeset
@@ -1092,7 +1075,7 @@ BEGIN
 		 ,TrialId as trial_name
 		  ,sd.assay_id
 	from deapp.de_subject_sample_mapping sd
-		,tm_lz.lt_src_RNA_SEQ_data md   
+		,tm_lz.lt_src_RNA_SEQ_data md
 		,probeset_deapp gs
 	where sd.sample_cd = md.expr_id
 	  and sd.platform = 'RNA_AFFYMETRIX'
@@ -1116,10 +1099,10 @@ get diagnostics rowCt := ROW_COUNT;
 		return -16;
 	end;
 	pExists := rowCt;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert into DEAPP wt_subject_rna_probeset',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	insert into de_subject_rna_data when dataType is T (transformed)
 
 	if dataType = 'T' then
@@ -1143,7 +1126,7 @@ get diagnostics rowCt := ROW_COUNT;
 					then 2.5
 					else intensity_value
 			   end as zscore
-		from tm_wz.wt_subject_rna_probeset 
+		from tm_wz.wt_subject_rna_probeset
 		where trial_name = TrialID;
 		get diagnostics rowCt := ROW_COUNT;
 	exception
@@ -1158,11 +1141,11 @@ get diagnostics rowCt := ROW_COUNT;
 	end;
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databaseName,procedureName,'Insert transformed into DEAPP de_subject_rna_data',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	else
-		
+
 	--	Calculate ZScores and insert data into de_subject_rna_data.  The 'L' parameter indicates that the RNA_sequencing  data will be selected from
-	--	wt_subject_RNA_seq_probeset as part of a Load.  
+	--	wt_subject_RNA_seq_probeset as part of a Load.
 
 		if dataType = 'R' or dataType = 'L' then
 			begin
@@ -1181,11 +1164,11 @@ get diagnostics rowCt := ROW_COUNT;
 			stepCt := stepCt + 1;
 			select cz_write_audit(jobId,databaseName,procedureName,'Calculate Z-Score',rowCt,stepCt,'Done') into rtnCd;
 		end if;
-	
+
 	end if;
-	
+
     ---Cleanup OVERALL JOB if this proc is being run standalone
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'End i2b2_process_RNA_SEQ_data',0,stepCt,'Done') into rtnCd;
 
@@ -1193,9 +1176,8 @@ get diagnostics rowCt := ROW_COUNT;
 	THEN
 		select cz_end_audit (jobID, 'SUCCESS') into rtnCd;
 	END IF;
-	
+
 	return 0;
 END;
- 
-$$;
 
+$$;

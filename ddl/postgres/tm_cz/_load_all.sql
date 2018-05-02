@@ -69,7 +69,6 @@
 \i tm_cz/functions/i2b2_load_rbm_annotation.sql
 \i tm_cz/functions/i2b2_load_rbm_data.sql
 \i tm_cz/functions/i2b2_load_sample_categories.sql
-\i tm_cz/functions/i2b2_load_security_data.sql
 \i tm_cz/functions/i2b2_load_study_metadata.sql
 \i tm_cz/functions/i2b2_metabolomics_zscore_calc.sql
 \i tm_cz/functions/i2b2_mirna_zscore_calc.sql

@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION i2b2_process_proteomics_data(trial_id character varyi
 
 --		tissue_type	=>	sample_type
 --		attribute_1	=>	tissue_type
---		atrribute_2	=>	timepoint	
+--		atrribute_2	=>	timepoint
 Declare
   TrialID		character varying(100);
   RootNode		character varying(2000);
@@ -45,7 +45,7 @@ Declare
   v_bio_experiment_id	numeric(18,0);
   errorNumber		character varying;
   errorMessage	character varying;
-  
+
     --Audit variables
   newJobFlag numeric(1);
   databaseName character varying(100);
@@ -53,7 +53,7 @@ Declare
   jobID numeric(18,0);
   stepCt numeric(18,0);
   rowCt numeric(18,0);
-  
+
 	addNodes CURSOR is
 	select distinct t.leaf_node
           ,t.node_name
@@ -62,31 +62,31 @@ Declare
 		 (select 1 from i2b2 x
 		  where t.leaf_node = x.c_fullname);
 
- 
+
 --	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
 
   delNodes CURSOR is
-  select distinct c_fullname 
+  select distinct c_fullname
   from  i2b2
   where c_fullname like topNode || '%'
     and substr(c_visualattributes,2,1) = 'H';
     --and c_visualattributes like '_H_';
 
-    uploadI2b2 cursor  is 
+    uploadI2b2 cursor  is
     select category_cd,display_value,display_label,display_unit from
     tm_lz.lt_src_protein_display_mapping;
 
 BEGIN
 	TrialID := upper(trial_id);
 	secureStudy := upper(secure_study);
-	
+
 	if (secureStudy not in ('Y','N') ) then
 		secureStudy := 'Y';
 	end if;
-	
-	topNode := REGEXP_REPLACE('\' || top_node || '\','(\\){2,}', '\', 'g');	
+
+	topNode := REGEXP_REPLACE('\' || top_node || '\','(\\){2,}', '\', 'g');
 	select length(topNode)-length(replace(topNode,'\','')) into topLevel;
-	
+
 	if data_type is null then
 		dataType := 'R';
 	else
@@ -96,7 +96,7 @@ BEGIN
 			dataType := 'R';
 		end if;
 	end if;
-	
+
 	logBase := log_base;
 	sourceCd := upper(coalesce(source_cd,'STD'));
 
@@ -114,20 +114,20 @@ BEGIN
     newJobFlag := 1; -- True
     select tm_cz.cz_start_audit(procedureName, databaseName) into jobID;
   END IF;
-    	
+
 	stepCt := 0;
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Starting i2b2_process_proteomics_data',0,stepCt,'Done') into rtnCd;
-	
+
 	--	Get count of records in LT_SRC_PROTEOMICS_SUB_SAM_MAP
-	
+
 	select count(*) into sCount
 	from LT_SRC_PROTEOMICS_SUB_SAM_MAP;
 
 	select count(*) into pCount
 	from LT_SRC_PROTEOMICS_SUB_SAM_MAP
 	where platform is null;
-	
+
 	if pCount > 0 then
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databasename,procedurename,'Platform data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
@@ -135,7 +135,7 @@ BEGIN
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 161;
 	end if;
-	
+
 	select count(*) into pCount
 	from LT_PROTEIN_ANNOTATION
 	where gpl_id in (select distinct m.platform from LT_SRC_PROTEOMICS_SUB_SAM_MAP m);
@@ -147,11 +147,11 @@ BEGIN
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 163;
 	end if;
-	
+
 	select count(*) into pCount
 	from DE_gpl_info
 	where platform in (select distinct m.platform from LT_SRC_PROTEOMICS_SUB_SAM_MAP m);
-	
+
 	if pCount = 0 then
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databasename,procedurename,'Platform not found in DE_GPL_INFO',1,stepCt,'ERROR') into rtnCd;
@@ -159,13 +159,13 @@ BEGIN
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 16;
 	end if;
-		
+
 	--	check if all subject_sample map records have a tissue_type, If not, abort run
-	
+
 	select count(*) into pCount
 	from LT_SRC_PROTEOMICS_SUB_SAM_MAP
 	where tissue_type is null;
-	
+
 	if pCount > 0 then
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databasename,procedurename,'Tissue Type data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
@@ -173,15 +173,15 @@ BEGIN
 		select CZ_END_AUDIT (JOBID,'FAIL') into rtnCd;
 		return 162;
 	end if;
-	
+
 	--	check if there are multiple platforms, if yes, then platform must be supplied in LT_SRC_PROTEOMICS_SUB_SAM_MAP
-	
+
 	select count(*) into pCount
 	from (select sample_cd
 		  from LT_SRC_PROTEOMICS_SUB_SAM_MAP
 		  group by sample_cd
 		  having count(distinct platform) > 1) as vtbl;
-	
+
 	if pCount > 0 then
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databasename,procedurename,'Multiple platforms for sample_cd in LT_SRC_PROTEOMICS_SUB_SAM_MAP',1,stepCt,'ERROR') into rtnCd;
@@ -189,29 +189,29 @@ BEGIN
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 164;
 	end if;
-		
+
 	-- Get root_node from topNode
-  
+
 	select parse_nth_value(topNode, 2, '\') into RootNode;
-	
+
 	select count(*) into pExists
 	from table_access
 	where c_name = rootNode;
-	
+
 	if pExists = 0 then
 		select i2b2_add_root_node(rootNode, jobId) into rtnCd;
 	end if;
-	
+
 	select c_hlevel into root_level
 	from i2b2
 	where c_name = RootNode;
-	
+
 	-- Get study name from topNode
-  
+
 	select parse_nth_value(topNode, topLevel, '\') into study_name;
-	
+
 	--	Add any upper level nodes as needed
-	
+
 	tPath := REGEXP_REPLACE(replace(top_node,study_name,''),'(\\){2,}', '\', 'g');
 	select length(tPath) - length(replace(tPath,'\','')) into pCount;
 
@@ -229,11 +229,11 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
-	select cz_write_audit(jobId,databaseName,procedureName,'Uppercase trial_name in LT_SRC_PROTEOMICS_SUB_SAM_MAP',rowCt,stepCt,'Done') into rtnCd;	
-	
+	select cz_write_audit(jobId,databaseName,procedureName,'Uppercase trial_name in LT_SRC_PROTEOMICS_SUB_SAM_MAP',rowCt,stepCt,'Done') into rtnCd;
+
 	--	create records in patient_dimension for subject_ids if they do not exist
 	--	format of sourcesystem_cd:  trial:[site:]subject_cd
 
@@ -269,7 +269,7 @@ BEGIN
 		   and upper(g.marker_type) = 'PROTEOMICS'
 		   and not exists
 			  (select 1 from patient_dimension x
-			   where x.sourcesystem_cd = 
+			   where x.sourcesystem_cd =
 				 regexp_replace(TrialID || ':' || coalesce(s.site_id,'') || ':' || s.subject_id,'(::){1,}', ':', 'g'))
 		) x;
 	exception
@@ -278,10 +278,10 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	get diagnostics rowCt := ROW_COUNT;
 	stepCt := stepCt + 1;
-	select cz_write_audit(jobId,databaseName,procedureName,'Insert subjects to patient_dimension',rowCt,stepCt,'Done') into rtnCd;	
+	select cz_write_audit(jobId,databaseName,procedureName,'Insert subjects to patient_dimension',rowCt,stepCt,'Done') into rtnCd;
 	select i2b2_create_security_for_trial(TrialId, secureStudy, jobID) into rtnCd;
 
 	--	Delete existing observation_fact data, will be repopulated
@@ -300,7 +300,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete data from observation_fact',rowCt,stepCt,'Done') into rtnCd;
@@ -314,16 +314,16 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete data from DE_SUBJECT_PROTEIN_DATA',rowCt,stepCt,'Done') into rtnCd;
-		
-	--	Cleanup any existing data in de_subject_sample_mapping.  
+
+	--	Cleanup any existing data in de_subject_sample_mapping.
 
 	begin
 	delete from DE_SUBJECT_SAMPLE_MAPPING ssm
-	where trial_name = TrialID 
+	where trial_name = TrialID
 	  and coalesce(ssm.source_cd,'STD') = sourceCd
 	  and platform = 'PROTEIN'
 	; --Making sure only proteomics data is deleted
@@ -333,7 +333,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		  
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
@@ -363,7 +363,7 @@ BEGIN
 				   ,a.attribute_2
 				   ,g.title
     from LT_SRC_PROTEOMICS_SUB_SAM_MAP a
-	    ,de_gpl_info g 
+	    ,de_gpl_info g
 	where a.trial_name = TrialID
 	  and coalesce(a.platform,'GPL570') = g.platform
 	  and a.source_cd = sourceCD
@@ -378,7 +378,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-      
+
 	--  and decode(dataType,'R',sign(a.intensity_value),1) = 1;	--	take all values when dataType T, only >0 for dataType R
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
@@ -395,7 +395,7 @@ BEGIN
 	,node_type
 	)
 	select distinct topNode || regexp_replace(replace(replace(replace(replace(replace(replace(
-	       category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1, '')),'ATTR2',coalesce(attribute_2, '')),'TISSUETYPE',tissue_type),'+','\'),'_',' ') || '\','(\\){2,}', '\', 'g') 
+	       category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1, '')),'ATTR2',coalesce(attribute_2, '')),'TISSUETYPE',tissue_type),'+','\'),'_',' ') || '\','(\\){2,}', '\', 'g')
 		  ,category_cd
 		  ,platform as platform
 		  ,tissue_type
@@ -409,7 +409,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create leaf nodes in DEAPP tmp_proteomics_nodes',rowCt,stepCt,'Done') into rtnCd;
@@ -441,7 +441,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create platform nodes in WT_PROTEOMICS_NODES',rowCt,stepCt,'Done') into rtnCd;
@@ -475,7 +475,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR1 nodes in WT_PROTEOMICS_NODES',rowCt,stepCt,'Done') into rtnCd;
@@ -509,7 +509,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in WT_PROTEOMICS_NODES',rowCt,stepCt,'Done') into rtnCd;
@@ -542,7 +542,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in WT_PROTEOMICS_NODES',rowCt,stepCt,'Done') into rtnCd;
@@ -555,7 +555,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Updated node_name in DEAPP tmp_proteomics_nodes',rowCt,stepCt,'Done') into rtnCd;
@@ -572,7 +572,7 @@ BEGIN
 			select cz_write_audit(jobId,databasename,procedurename,'Error while executing tm_cz.i2b2_add_node(' || TrialID || ',' || r_addNodes.leaf_node || ',' || r_addNodes.node_name || ',' || jobId || ')' ,1,stepCt,'ERROR') into rtnCd;
 			select cz_end_audit (jobId,'FAIL') into rtnCd;
 			return 168;
-		end if;	
+		end if;
 		tText := 'Added Leaf Node: ' || r_addNodes.leaf_node || '  Name: ' || r_addNodes.node_name;
 		select cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
 		select i2b2_fill_in_tree(TrialId, r_addNodes.leaf_node, jobID) into rtnCd;
@@ -580,9 +580,9 @@ BEGIN
 			select cz_write_audit(jobId,databasename,procedurename,'Error while executing tm_cz.i2b2_fill_in_tree(' || TrialID || ',' || r_addNodes.leaf_node || ',' || jobId || ')' ,1,stepCt,'ERROR') into rtnCd;
 			select cz_end_audit (jobId,'FAIL') into rtnCd;
 			return 170;
-		end if;	
-	END LOOP;  
-	
+		end if;
+	END LOOP;
+
 --	update concept_cd for nodes, this is done to make the next insert easier
 
 	begin
@@ -601,7 +601,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Update WT_PROTEOMICS_NODES with newly created concept_cds',rowCt,stepCt,'Done') into rtnCd;
@@ -627,7 +627,7 @@ BEGIN
   --SAMPLE_ID		= id of sample (trial:S:[site_id]:subject_id:sample_cd) from patient_dimension, may be the same as patient_num
   --SAMPLE_CD		= sample_cd
   --SOURCE_CD		= sourceCd
-  
+
   --ASSAY_ID        = generated by trigger
 
 	begin
@@ -701,7 +701,7 @@ BEGIN
 			  ,a.source_cd
 			  ,TrialId as omic_source_study
 			  ,b.patient_num as omic_patient_id
-		from lt_src_proteomics_sub_sam_map a		
+		from lt_src_proteomics_sub_sam_map a
 		--Joining to Pat_dim to ensure the ID's match. If not I2B2 won't work.
 		inner join patient_dimension b
 		  on regexp_replace(TrialID || ':' || coalesce(a.site_id,'') || ':' || a.subject_id,'(::){1,}', ':', 'g') = b.sourcesystem_cd
@@ -718,28 +718,28 @@ BEGIN
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(pn.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(pn.attribute_1,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'PLATFORM')+8),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(pn.attribute_2,'@')
-			and pn.node_type = 'PLATFORM'	  
+			and pn.node_type = 'PLATFORM'
 		left outer join WT_PROTEOMICS_NODES ttp
 			on a.tissue_type = ttp.tissue_type
 			and ttp.category_cd=substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10)
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'PLATFORM') > 1 then a.platform else '@' end = coalesce(ttp.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(ttp.attribute_1,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'TISSUETYPE')+10),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(ttp.attribute_2,'@')
-			and ttp.node_type = 'TISSUETYPE'		  
+			and ttp.node_type = 'TISSUETYPE'
 		left outer join WT_PROTEOMICS_NODES a1
 			on a.attribute_1 = a1.attribute_1
 			and a1.category_cd=substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5)
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a1.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a1.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR1')+5),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(a1.attribute_2,'@')
-			and a1.node_type = 'ATTR1'		  
+			and a1.node_type = 'ATTR1'
 		left outer join WT_PROTEOMICS_NODES a2
 			on a.attribute_2 = a1.attribute_2
 			and a2.category_cd=substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5)
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a2.platform,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a2.tissue_type,'@')
 			and case when instr(substr(a.category_cd,1,instr(a.category_cd,'ATTR2')+5),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(a2.attribute_1,'@')
-			and a2.node_type = 'ATTR2'			  
+			and a2.node_type = 'ATTR2'
 		left outer join patient_dimension sid
 			on  regexp_replace(TrialId || ':S:' || coalesce(a.site_id,'') || ':' || a.subject_id || ':' || a.sample_cd,
 							  '(::){1,}', ':', 'g') = sid.sourcesystem_cd
@@ -773,7 +773,7 @@ BEGIN
 	,units_cd
          ,sample_cd
         ,INSTANCE_NUM
-        
+
     )
     select distinct m.patient_id
 		  ,m.concept_code
@@ -790,7 +790,7 @@ BEGIN
                    ,m.sample_cd
                    ,1
     from  de_subject_sample_mapping m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCD
       and m.platform = 'PROTEIN';
 	exception
@@ -799,11 +799,11 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert patient facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
-	--	Insert sample facts 
+	--	Insert sample facts
 
 	begin
 	insert into observation_fact
@@ -837,7 +837,7 @@ BEGIN
                    ,m.sample_cd
                   ,1
     from  de_subject_sample_mapping m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCd
       and m.platform = 'PROTEIN'
 	 and m.patient_id != m.sample_id;
@@ -847,7 +847,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
     stepCt := stepCt + 1;
     get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert sample facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
@@ -862,15 +862,15 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-  
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Initialize data_type and xml in i2b2',rowCt,stepCt,'Done') into rtnCd;
 
 	 ---INSERT sample_dimension
 	begin
-      INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD) 
-         SELECT DISTINCT SAMPLE_CD FROM 
+      INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
+         SELECT DISTINCT SAMPLE_CD FROM
 	   DEAPP.DE_SUBJECT_SAMPLE_MAPPING WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) ;
 	exception
 	when others then
@@ -897,7 +897,7 @@ BEGIN
                 <UnitValues><NormalUnits>ratio</NormalUnits><EqualUnits></EqualUnits>
                 <ExcludingUnits></ExcludingUnits><ConvertingUnits><Units></Units><MultiplyingFactor></MultiplyingFactor>
                 </ConvertingUnits></UnitValues><Analysis><Enums /><Counts />
-                <New /></Analysis>'||(select xmlelement(name "SeriesMeta",xmlforest(m.display_value as "Value",m.display_unit as "Unit",m.display_label as "DisplayName")) as hi 
+                <New /></Analysis>'||(select xmlelement(name "SeriesMeta",xmlforest(m.display_value as "Value",m.display_unit as "Unit",m.display_label as "DisplayName")) as hi
       from tm_lz.lt_src_protein_display_mapping m where m.category_cd=ul.category_cd)||
                 '</ValueMetadata>') where n.c_fullname=(select leaf_node from WT_PROTEOMICS_NODES where category_cd=ul.category_cd and leaf_node=n.c_fullname);
         exception
@@ -907,7 +907,7 @@ BEGIN
 		return -16;
 	end;
                 end loop;
-		  
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Update c_columndatatype and c_metadataxml for numeric data types in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
@@ -926,11 +926,11 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	  
+
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for leaf nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
-  
+
         begin
 	update i2b2 a
 	set c_visualattributes='FAS'
@@ -941,19 +941,19 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-        
+
         stepCt := stepCt + 1;
         get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
-  
+
   --Build concept Counts
   --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
   -- a unique top-level node for proteomics data
-  
+
     select i2b2_create_concept_counts(topNode ,jobID ) into rtnCd;
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done') into rtnCd;
-	
+
 	--	delete each node that is hidden
 
 	 FOR r_delNodes in delNodes Loop
@@ -966,16 +966,10 @@ BEGIN
 		get diagnostics rowCt := ROW_COUNT;
 		select cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
 
-	END LOOP;  	
+	END LOOP;
 
 
-  --Reload Security: Inserts one record for every I2B2 record into the security table
-
-    select i2b2_load_security_data(jobId) into rtnCd;
-	stepCt := stepCt + 1;
-	select cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done') into rtnCd;
-
---	tag data with probeset_id from reference.probeset_deapp
+    --	tag data with probeset_id from reference.probeset_deapp
 	begin
 	execute('truncate table tm_wz.WT_SUBJECT_PROTEOMICS_PROBESET');
 	exception
@@ -984,7 +978,7 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	--	note: assay_id represents a unique subject/site/sample
 
 	begin
@@ -1005,7 +999,7 @@ BEGIN
 		  ,TrialId
 		  ,sd.assay_id
 	from deapp.de_subject_sample_mapping sd
-		,LT_SRC_PROTEOMICS_DATA md   
+		,LT_SRC_PROTEOMICS_DATA md
               --  ,peptide_deapp p
 	where sd.sample_cd = md.m_p_id
 	  and sd.platform = 'PROTEIN'
@@ -1014,7 +1008,7 @@ BEGIN
 	 -- and sd.gpl_id = gs.id_ref
 	--  and md.peptide =p.peptide
 	 and CASE WHEN dataType = 'R' THEN sign(md.intensity_value::numeric) ELSE 1 END <> -1   --UAT 154 changes done on 19/03/2014
-	 and sd.subject_id in (select subject_id from lt_src_proteomics_sub_sam_map) 
+	 and sd.subject_id in (select subject_id from lt_src_proteomics_sub_sam_map)
 	group by md.peptide ,subject_id
 		  ,sd.patient_id,sd.assay_id;
 
@@ -1024,13 +1018,13 @@ BEGIN
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-	
+
 	get diagnostics rowCt := ROW_COUNT;
 	pExists := rowCt;
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert into DEAPP WT_SUBJECT_PROTEOMICS_PROBESET',rowCt,stepCt,'Done') into rtnCd;
-		
+
 	if pExists = 0 then
 		stepCt := stepCt + 1;
 		select cz_write_audit(jobId,databasename,procedurename,'Unable to match probesets to platform in probeset_deapp',1,stepCt,'ERROR') into rtnCd;
@@ -1052,18 +1046,18 @@ BEGIN
 	,gene_id
 	,assay_id
 	,subject_id
-	,intensity 
+	,intensity
 	,zscore
         ,log_intensity
 	,patient_id
 		)
-		select TrialId 
+		select TrialId
                   ,d.id
 		  ,m.probeset
                   ,d.uniprot_id
                   ,d.biomarker_id
 		  ,m.assay_id
-                  ,m.subject_id 
+                  ,m.subject_id
                    ,m.intensity_value as intensity ----UAT 154 changes done on 19/03/2014
 			  ,case when m.intensity_value < -2.5
 			        then -2.5
@@ -1072,7 +1066,7 @@ BEGIN
 					else m.intensity_value
 			   end as zscore
                            /*, case when m.intensity_value > 0 then round(log(2, m.intensity_value),6)
-                            else 0 
+                            else 0
                             end */
                             ,round(log(2, m.intensity_value + 0.001),6)  ----UAT 154 changes done on 19/03/2014
                             ,m.patient_id
@@ -1090,20 +1084,20 @@ BEGIN
 		get diagnostics rowCt := ROW_COUNT;
 		select cz_write_audit(jobId,databaseName,procedureName,'Insert transformed into DEAPP DE_SUBJECT_PROTEIN_DATA',rowCt,stepCt,'Done') into rtnCd;
 	else
-		
+
 	--	Calculate ZScores and insert data into de_subject_protein_data.  The 'L' parameter indicates that the proteomics data will be selected from
-	--	WT_SUBJECT_PROTEOMICS_PROBESET as part of a Load.  
+	--	WT_SUBJECT_PROTEOMICS_PROBESET as part of a Load.
 
 		if dataType = 'R' or dataType = 'L' then
 			select I2B2_PROTEOMICS_ZSCORE_CALC(TrialID,'L',jobId,dataType,logBase,sourceCD) into rtnCd;
 			stepCt := stepCt + 1;
 			select cz_write_audit(jobId,databaseName,procedureName,'Calculate Z-Score',0,stepCt,'Done') into rtnCd;
 		end if;
-	
+
 	end if;
 
     ---Cleanup OVERALL JOB if this proc is being run standalone
-	
+
 	stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'End i2b2_process_proteomics_data',0,stepCt,'Done') into rtnCd;
 
@@ -1115,4 +1109,3 @@ BEGIN
 	return rtnCd;
 END;
 $$;
-

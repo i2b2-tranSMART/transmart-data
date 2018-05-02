@@ -19,7 +19,7 @@ DECLARE
 
 --		tissue_type	=>	sample_type
 --		attribute_1	=>	tissue_type
---		atrribute_2	=>	timepoint	
+--		atrribute_2	=>	timepoint
 
   TrialID		varchar(100);
   RootNode		varchar(2000);
@@ -48,7 +48,7 @@ DECLARE
   partitioniD	numeric(18,0);
   partitionName	varchar(100);
   partitionIndx	varchar(100);
-  
+
     --Audit variables
   newJobFlag integer;
   databaseName varchar(100);
@@ -68,11 +68,11 @@ DECLARE
 		 (select 1 from i2b2metadata.i2b2 x
 		  where t.leaf_node = x.c_fullname);
 
- 
+
 --	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
 
   delNodes CURSOR FOR
-  SELECT distinct c_fullname 
+  SELECT distinct c_fullname
   from  i2b2metadata.i2b2
   where c_fullname like topNode || '%'
     and substring(c_visualattributes from 2 for 1) = 'H';
@@ -87,14 +87,14 @@ DECLARE
 BEGIN
 	TrialID := upper(trial_id);
 	secureStudy := upper(secure_study);
-	
+
 	if (secureStudy not in ('Y','N') ) then
 		secureStudy := 'Y';
 	end if;
-	
+
 	topNode := REGEXP_REPLACE('\' || top_node || '\','(\\){2,}', '\','g');
 	select length(topNode)-length(replace(topNode,'\','')) into topLevel ;
-	
+
 	if coalesce(data_type::text, '') = '' then
 		dataType := 'R';
 	else
@@ -104,7 +104,7 @@ BEGIN
 			dataType := 'R';
 		end if;
 	end if;
-	
+
 	logBase := log_base;
 	sourceCd := upper(coalesce(source_code,'STD'));
 
@@ -122,16 +122,16 @@ BEGIN
     newJobFlag := 1; -- True
     select tm_cz.cz_start_audit (procedureName, databaseName, jobID) into jobId;
   END IF;
-    	
+
 	stepCt := 0;
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Starting i2b2_load_rbm_data',0,stepCt,'Done') into rtnCd;
-	
+
 	--	Get count of records in LT_SRC_RBM_SUBJ_SAMP_MAP
-	
+
 	select count(*) into sCount
 	from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP;
-	
+
 	--	check if all subject_sample map records have a platform, If not, abort run
        /* if sCount > 0 then
 		select tm_cz.cz_write_audit(jobId,databasename,procedurename,'Platform data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
@@ -143,44 +143,44 @@ BEGIN
 	select count(*) into pCount
 	from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP
 	where coalesce(platform::text, '') = '';
-	
+
 	if pCount > 0 then
 		select tm_cz.cz_write_audit(jobId,databasename,procedurename,'Platform data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 161;
 	end if;
-  
+
   	--	check if platform exists in de_rbm_annotation .  If not, abort run.
-	
+
 	select count(*) into pCount
 	from TM_LZ.LT_SRC_RBM_ANNOTATION --change
 	where gpl_id in (select distinct m.platform from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP m);
-	
+
 	select count(*) into pCount
 	from DEAPP.DE_gpl_info
 	where platform in (select distinct m.platform from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP m);
-	
+
 	if PCOUNT = 0 then
 		select tm_cz.cz_write_audit(jobId,databasename,procedurename,'Platform not found in de_rbm_annotation',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 163;
 	end if;
-		
+
 	--	check if all subject_sample map records have a tissue_type, If not, abort run
-	
+
 	select count(*) into pCount
 	from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP
 	where coalesce(tissue_type::text, '') = '';
-	
+
 	if pCount > 0 then
 		select tm_cz.cz_write_audit(jobId,databasename,procedurename,'Tissue Type data missing from one or more subject_sample mapping records',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select CZ_END_AUDIT (JOBID,'FAIL') into rtnCd;
-		return 162;  
+		return 162;
 	end if;
-	
+
 	--	check if there are multiple platforms, if yes, then platform must be supplied in LT_SRC_RBM_DATA
 
 	select count(*) into pCount
@@ -188,36 +188,36 @@ BEGIN
 		  from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP
 		  group by sample_cd
 		  having count(distinct platform) > 1) as x;
-	
+
 	if pCount > 0 then
 		select tm_cz.cz_write_audit(jobId,databasename,procedurename,'Multiple platforms for sample_cd in TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP',1,stepCt,'ERROR') into rtnCd;
 		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
 		select cz_end_audit (jobId,'FAIL') into rtnCd;
 		return 164;
 	end if;
-		
+
 	-- Get root_node from topNode
-  
+
 	select tm_cz.parse_nth_value(topNode, 2, '\') into RootNode ;
-	
+
 	select count(*) into pExists
 	from i2b2metadata.table_access
 	where c_name = rootNode;
-	
+
 	if pExists = 0 then
 		perform tm_cz.i2b2_add_root_node(rootNode, jobId);
 	end if;
-	
+
 	select c_hlevel into root_level
 	from i2b2metadata.i2b2
 	where c_name = RootNode;
-	
+
 	-- Get study name from topNode
-  
+
 	select tm_cz.parse_nth_value(topNode, topLevel, '\') into study_name ;
-	
+
 	--	Add any upper level nodes as needed
-	
+
 	tPath := REGEXP_REPLACE(replace(top_node,study_name,''),'(\\){2,}', '\', 'g');
 	select length(tPath) - length(replace(tPath,'\','')) into pCount ;
 
@@ -240,7 +240,7 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Uppercase trial_name in LT_SRC_RBM_SUBJ_SAMP_MAP',rowCt,stepCt,'Done') into rtnCd;
 
@@ -278,7 +278,7 @@ BEGIN
 		   and upper(g.marker_type) = 'RBM'
 		   and not exists
 			  (select 1 from i2b2demodata.patient_dimension x
-			   where x.sourcesystem_cd = 
+			   where x.sourcesystem_cd =
 				  regexp_replace(TrialID || ':' || coalesce(s.site_id,'') || ':' || s.subject_id,'(::){1,}', ':', 'g'))
 		) as x;
 		get diagnostics rowCt := ROW_COUNT;
@@ -292,12 +292,12 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	pCount := rowCt;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert subjects to patient_dimension',pCount,stepCt,'Done') into rtnCd;
-	
+
 	perform tm_cz.i2b2_create_security_for_trial(TrialId, secureStudy, jobID);
 
 	--	Delete existing observation_fact data, will be repopulated
@@ -320,17 +320,17 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data from observation_fact',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	select count(*) into partExists
 	from deapp.de_subject_sample_mapping sm
 	where sm.trial_name = TrialId
 	and coalesce(sm.source_cd,'STD') = sourceCd
 	and sm.platform = 'RBM'
 	and sm.partition_id is not null;
-	
+
 	if partExists = 0 then
 		select nextval('deapp.seq_rbm_partition_id') into partitionId;
 	else
@@ -344,10 +344,10 @@ BEGIN
 	partitionName := 'deapp.de_subject_rbm_data_' || partitionId::text;
 	partitionIndx := 'de_subject_rbm_data_' || partitionId::text;
 
-	--	Cleanup any existing data in de_subject_sample_mapping.  
+	--	Cleanup any existing data in de_subject_sample_mapping.
 	begin
-	delete from deapp.DE_SUBJECT_SAMPLE_MAPPING 
-	where trial_name = TrialID 
+	delete from deapp.DE_SUBJECT_SAMPLE_MAPPING
+	where trial_name = TrialID
 	  and coalesce(source_cd,'STD') = sourceCd
 	  and platform = 'RBM'; --Making sure only rbm data is deleted
 		get diagnostics rowCt := ROW_COUNT;
@@ -361,14 +361,14 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 
 --	truncate tmp node table
 
 	EXECUTE('truncate table tm_wz.WT_RBM_NODES');
-	
+
 --	load temp table with leaf node path, use temp table with distinct sample_type, ATTR2, platform, and title   this was faster than doing subselect
 --	from wt_subject_rbm_data
 
@@ -389,7 +389,7 @@ BEGIN
 				   ,a.attribute_2
 				   ,g.title
     from TM_LZ.LT_SRC_RBM_SUBJ_SAMP_MAP a
-	    ,DEAPP.DE_gpl_info g 
+	    ,DEAPP.DE_gpl_info g
 	where a.trial_name = TrialID
 	  and coalesce(a.platform,'GPL570') = g.platform
 	  and a.source_cd = sourceCD
@@ -408,11 +408,11 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-      
+
 	--  and decode(dataType,'R',sign(a.intensity_value),1) = 1;	--	take all values when dataType T, only >0 for dataType R
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert node values into DEAPP wt_rbm_node_values',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	begin
 	insert into tm_wz.WT_RBM_NODES
 	(leaf_node
@@ -445,9 +445,9 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 	end;
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create leaf nodes in DEAPP tmp_rbm_nodes',rowCt,stepCt,'Done') into rtnCd;
-	
+
 	--	insert for platform node so platform concept can be populated
-	
+
 	begin
 	insert into tm_wz.WT_RBM_NODES
 	(leaf_node
@@ -479,11 +479,11 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create platform nodes in wt_rbm_nodes',rowCt,stepCt,'Done') into rtnCd;
 
-	
+
 	--	insert for ATTR1 node so ATTR1 concept can be populated in tissue_type_cd
 
 	begin
@@ -519,11 +519,11 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create ATTR1 nodes in WT_RBM_NODES',rowCt,stepCt,'Done') into rtnCd;
 
-	
+
 	--	insert for ATTR2 node so ATTR2 concept can be populated in timepoint_cd
 	begin
 	insert into tm_wz.WT_RBM_NODES
@@ -558,11 +558,11 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in WT_RBM_NODES',rowCt,stepCt,'Done') into rtnCd;
 
-	
+
 	--	insert for tissue_type node so sample_type_cd can be populated
 	begin
 	insert into tm_wz.WT_RBM_NODES
@@ -596,7 +596,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-		   
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create ATTR2 nodes in wt_qpcr_rbm_nodes',rowCt,stepCt,'Done') into rtnCd;
 
@@ -614,11 +614,11 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Updated node_name in DEAPP tmp_rbm_nodes',rowCt,stepCt,'Done') into rtnCd;
 
-		
+
 --	add leaf nodes for RBM data  The cursor will only add nodes that do not already exist.
 
 	 FOR r_addNodes in addNodes Loop
@@ -639,18 +639,18 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 	end;
 		stepCt := stepCt + 1;
 		tText := 'Added Leaf Node: ' || r_addNodes.leaf_node || '  Name: ' || r_addNodes.node_name;
-		
+
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
-		
+
 		perform tm_cz.i2b2_fill_in_tree(TrialId, r_addNodes.leaf_node, jobID);
 
-	END LOOP;  
-	
+	END LOOP;
+
 --	update concept_cd for nodes, this is done to make the next insert easier
 	begin
 	update tm_wz.WT_RBM_NODES t
 	set concept_cd=(select c.concept_cd from i2b2demodata.concept_dimension c
-	                where c.concept_path = t.leaf_node 
+	                where c.concept_path = t.leaf_node
 				   )
     where exists
          (select 1 from i2b2demodata.concept_dimension x
@@ -671,7 +671,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Update WT_RBM_NODES with newly created concept_cds',rowCt,stepCt,'Done') into rtnCd;
 
-	 
+
 
   --Load the DE_SUBJECT_SAMPLE_MAPPING from wt_subject_rbm_data
 
@@ -695,7 +695,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
   --SAMPLE_ID		= id of sample (trial:S:[site_id]:subject_id:sample_cd) from patient_dimension, may be the same as patient_num
   --SAMPLE_CD		= sample_cd
   --SOURCE_CD		= sourceCd
-  
+
   --ASSAY_ID        = generated by trigger
 	begin
 	insert into deapp.DE_SUBJECT_SAMPLE_MAPPING
@@ -770,7 +770,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 			  ,a.source_cd
 			  ,TrialId as omic_source_study
 			  ,b.patient_num as omic_patient_id
-		from TM_LZ.LT_SRC_rbm_subj_samp_map a		
+		from TM_LZ.LT_SRC_rbm_subj_samp_map a
 		--Joining to Pat_dim to ensure the ID's match. If not I2B2 won't work.
 		inner join i2b2demodata.patient_dimension b
 		  on regexp_replace(TrialID || ':' || coalesce(a.site_id,'') || ':' || a.subject_id,'(::){1,}', ':', 'g') = b.sourcesystem_cd
@@ -785,25 +785,25 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'PLATFORM')+8),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(pn.tissue_type,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'PLATFORM')+8),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(pn.attribute_1,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'PLATFORM')+8),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(pn.attribute_2,'@')
-			and pn.node_type = 'PLATFORM'	  
+			and pn.node_type = 'PLATFORM'
 		left outer join tm_wz.WT_RBM_NODES ttp
 			on a.tissue_type = ttp.tissue_type
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'TISSUETYPE')+10),'PLATFORM') > 1 then a.platform else '@' end = coalesce(ttp.platform,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'TISSUETYPE')+10),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(ttp.attribute_1,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'TISSUETYPE')+10),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(ttp.attribute_2,'@')
-			and ttp.node_type = 'TISSUETYPE'		  
+			and ttp.node_type = 'TISSUETYPE'
 		left outer join tm_wz.WT_RBM_NODES a1
 			on a.attribute_1 = a1.attribute_1
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR1')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a1.platform,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR1')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a1.tissue_type,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR1')+5),'ATTR2') > 1 then a.attribute_2 else '@' end = coalesce(a1.attribute_2,'@')
-			and a1.node_type = 'ATTR1'		  
+			and a1.node_type = 'ATTR1'
 		left outer join tm_wz.WT_RBM_NODES a2
 			on a.attribute_2 = a1.attribute_2
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR2')+5),'PLATFORM') > 1 then a.platform else '@' end = coalesce(a2.platform,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR2')+5),'TISSUETYPE') > 1 then a.tissue_type else '@' end = coalesce(a2.tissue_type,'@')
 			and case when tm_cz.instr(substr(a.category_cd,1,tm_cz.instr(a.category_cd,'ATTR2')+5),'ATTR1') > 1 then a.attribute_1 else '@' end = coalesce(a2.attribute_1,'@')
-			and a2.node_type = 'ATTR2'			  
+			and a2.node_type = 'ATTR2'
 		left outer join i2b2demodata.patient_dimension sid
 			 on regexp_replace(TrialID || ':' || coalesce(a.site_id,'') || ':' || a.subject_id,'(::){1,}', ':','g') = sid.sourcesystem_cd
 		where a.trial_name = TrialID
@@ -852,7 +852,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		  ,'' -- no units available
                   ,1
     from  deapp.DE_SUBJECT_SAMPLE_MAPPING m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCD
       and m.platform = 'RBM';
 	get diagnostics rowCt := ROW_COUNT;
@@ -866,13 +866,13 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	  
+
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert patient facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
 
-    
-    
-	--	Insert sample facts 
+
+
+	--	Insert sample facts
 	begin
 	insert into i2b2demodata.observation_fact
     (patient_num
@@ -899,7 +899,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		  ,'@'
 		  ,'' -- no units available
     from  deapp.DE_SUBJECT_SAMPLE_MAPPING m
-    where m.trial_name = TrialID 
+    where m.trial_name = TrialID
 	  and m.source_cd = sourceCd
       and m.platform = 'RBM'
 	 and m.patient_id != m.sample_id;
@@ -917,8 +917,8 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
     stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert sample facts into I2B2DEMODATA observation_fact',rowCt,stepCt,'Done') into rtnCd;
 
-    
-    
+
+
 	--Update I2b2 for correct data type
 	begin
 	update i2b2metadata.i2b2 t
@@ -937,7 +937,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 	end;
 	    stepCt := stepCt + 1;
     select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Initialize data_type and xml in i2b2',rowCt,stepCt,'Done') into rtnCd;
-    
+
      ---INSERT sample_dimension
 	 begin
       INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
@@ -958,7 +958,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'insert distinct sample_cd in sample_dimension from de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 
 		---- update c_metadataxml in i2b2
-	begin	
+	begin
 		   for ul in uploadI2b2
 			loop
 		 update i2b2metadata.i2b2 n
@@ -974,7 +974,7 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 					<New /></Analysis>'||(select xmlelement(name "SeriesMeta",xmlforest(m.display_value as "Value",m.display_unit as "Unit",m.display_label as "DisplayName")) as hi
 		  from tm_lz.lt_src_rbm_display_mapping m where m.category_cd=ul.category_cd)||
 					'</ValueMetadata>') where n.c_fullname=(select leaf_node from tm_wz.WT_RBM_NODES where category_cd=ul.category_cd  and leaf_node=n.c_fullname);
-					
+
 					end loop;
 	get diagnostics rowCt := ROW_COUNT;
 	exception
@@ -1008,10 +1008,10 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 		--End Proc
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
-	end;  
+	end;
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for leaf nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
-  
+
 begin
     update i2b2metadata.i2b2 a
 	set c_visualattributes='FAS'
@@ -1020,23 +1020,23 @@ begin
 	when others then
 		errorNumber := SQLSTATE;
 		errorMessage := SQLERRM;
-		perform tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage);	
+		perform tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage);
 		perform tm_cz.cz_end_audit (jobID, 'FAIL');
 		return -16;
 	end;
-        
+
         stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
 	perform cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done');
-    
-  
+
+
   --Build concept Counts
   --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
   -- a unique top-level node for rbm data
-  
+
     perform tm_cz.i2b2_create_concept_counts(topNode ,jobID );
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done') into rtnCd;
-	
+
 	--	delete each node that is hidden
 
 	 FOR r_delNodes in delNodes Loop
@@ -1057,22 +1057,16 @@ begin
 	end;
 		stepCt := stepCt + 1;
 		tText := 'Deleted node: ' || r_delNodes.c_fullname;
-		
+
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
 
-	END LOOP;  	
-
-
-  --Reload Security: Inserts one record for every I2B2 record into the security table
-
-    perform tm_cz.i2b2_load_security_data(jobId);
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done') into rtnCd;
+	END LOOP;
+    
 
 --	tag data with probeset_id from reference.probeset_deapp
-  
+
 	EXECUTE ('truncate table tm_wz.WT_SUBJECT_RBM_PROBESET');
-	
+
 	--	note: assay_id represents a unique subject/site/sample
 	begin
 	insert into tm_wz.WT_SUBJECT_RBM_PROBESET  --mod
@@ -1089,7 +1083,7 @@ begin
         ,timepoint
         ,sample_type
         ,platform
-        ,tissue_type    
+        ,tissue_type
     )
     select md.analyte
           ,avg(md.avalue)
@@ -1131,14 +1125,14 @@ begin
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 	end;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Insert into DEAPP wt_subject_rbm_probeset',rowCt,stepCt,'Done') into rtnCd;
-	
+
 --mod
 
 	--	Calculate ZScores and insert data into de_subject_rbm_data.  The 'L' parameter indicates that the gene expression data will be selected from
-	--	wt_subject_rbm_probeset as part of a Load.  
+	--	wt_subject_rbm_probeset as part of a Load.
 
 		if dataType = 'R' or dataType = 'L' then
 			perform tm_cz.i2b2_rbm_zscore_calc_new(TrialID, partitionName, partitionindx,partitioniD,'L',jobId,dataType,logBase,sourceCD);
@@ -1147,7 +1141,7 @@ begin
 		end if;
 
     ---Cleanup OVERALL JOB if this proc is being run standalone
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'End i2b2_LOAD_RBM_DATA',0,stepCt,'Done') into rtnCd;
 
@@ -1156,8 +1150,7 @@ begin
 		select tm_cz.cz_end_audit (jobID, 'SUCCESS') into rtnCd;
 	END IF;
 
-	return 0 ; 
+	return 0 ;
 END;
- 
-$$;
 
+$$;

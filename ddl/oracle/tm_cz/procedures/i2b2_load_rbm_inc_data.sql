@@ -930,7 +930,7 @@ dbms_output.put_line('1');
 
   --Reload Security: Inserts one record for every I2B2 record into the security table
 
-    i2b2_load_security_data(jobId);
+    
 	stepCt := stepCt + 1;
 	cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done');
 
