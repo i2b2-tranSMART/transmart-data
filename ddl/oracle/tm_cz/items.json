@@ -3608,10 +3608,6 @@
     }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
-      "name" : "I2B2_TAGS"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
       "name" : "LZ_SRC_CLINICAL_DATA"
     }, {
       "type" : "SYNONYM",
@@ -5394,10 +5390,6 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_TAGS"
     }, {
       "type" : "FUNCTION",
       "owner" : "TM_CZ",
@@ -8558,11 +8550,7 @@
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_TAGS"
-    } ]
+    }, ]
   }, {
     "child" : {
       "type" : "PROCEDURE",
@@ -8854,17 +8842,6 @@
       "name" : "I2B2_TABLE_DEFRAG"
     },
     "parents" : [ ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_TAGS"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_TAGS"
-    } ]
   }, {
     "child" : {
       "type" : "TABLE",

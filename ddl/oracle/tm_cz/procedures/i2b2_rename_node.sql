@@ -59,19 +59,7 @@ BEGIN
   then
 
     COMMIT;
-
-    --Update path in i2b2_tags
-    update i2b2_tags t
-      set path = replace(t.path, '\' || old_node || '\', '\' || new_node || '\')
-      where t.path in
-		   (select cd.concept_path from concept_dimension cd
-		    where cd.sourcesystem_cd = trial_id
-              and cd.concept_path like '%\' || old_node || '\%');
-	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update i2b2_tags with new path',SQL%ROWCOUNT,stepCt,'Done');
-
-    COMMIT;
-
+    
     --Update specific name
     --update concept_dimension
     --  set name_char = new_node

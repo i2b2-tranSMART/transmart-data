@@ -69,14 +69,6 @@ BEGIN
 
 	i2b2_delete_all_nodes(path_string,jobId);
 
-	--	delete any i2b2_tag data
-
-	delete from i2b2_tags
-	where path like path_string || '%';
-	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2_tags',SQL%ROWCOUNT,stepCt,'Done');
-	commit;
-
 	--	delete clinical data
 
 	delete from lz_src_clinical_data
