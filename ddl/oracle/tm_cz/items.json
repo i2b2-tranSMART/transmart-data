@@ -8873,13 +8873,6 @@
     "child" : {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_TABLE_BKP"
-    },
-    "parents" : [ ]
-  }, {
-    "child" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_TABLE_DEFRAG"
     },
     "parents" : [ ]
