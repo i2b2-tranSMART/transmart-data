@@ -74,7 +74,7 @@ Declare
 		  where t.leaf_node = x.c_fullname);
 
 
---	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
 
   delNodes CURSOR FOR
   SELECT distinct c_fullname
@@ -1016,13 +1016,6 @@ category_cd,'PLATFORM',title),'ATTR1',coalesce(attribute_1,'')),'ATTR2',coalesce
 	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
 	perform cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done');
 
-  --Build concept Counts
-  --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
-  -- a unique top-level node for metabolomic data
-
-    perform i2b2_create_concept_counts(topNode ,jobID );
-	stepCt := stepCt + 1;
-	perform cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done');
 
 	--	delete each node that is hidden
 

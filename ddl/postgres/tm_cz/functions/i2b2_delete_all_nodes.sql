@@ -105,25 +105,7 @@ Begin
 		end;
 		stepCt := stepCt + 1;
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2',rowCt,stepCt,'Done') into rtnCd;
-  
 
-		--concept_counts
-		begin
-		DELETE FROM i2b2demodata.concept_counts
-		WHERE concept_path LIKE PATH || '%' escape '`';
-		get diagnostics rowCt := ROW_COUNT;
-		exception
-		when others then
-			errorNumber := SQLSTATE;
-			errorMessage := SQLERRM;
-			--Handle errors.
-			select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
-			--End Proc
-			select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
-			return -16;
-		end;
-		stepCt := stepCt + 1;
-		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_counts',rowCt,stepCt,'Done') into rtnCd;
 
 	end if;
 

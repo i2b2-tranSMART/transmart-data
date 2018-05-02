@@ -1,7 +1,7 @@
 --
 -- Type: PROCEDURE; Owner: TM_CZ; Name: I2B2_HIDE_NODE
 --
-  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_HIDE_NODE" 
+  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_HIDE_NODE"
 (
   path VARCHAR2
 )
@@ -24,18 +24,15 @@ BEGIN
 ******************************************************************/
 
   if path != ''  and path != '%'
-  then 
-  
+  then
+
 	update i2b2 b
 	set c_visualattributes=substr(b.c_visualattributes,1,1) || 'H' || substr(b.c_visualattributes,3,1)
 	where c_fullname like path || '%';
-	
-	delete from concept_counts
-	where concept_path like path || '%';
-	
+
 	commit;
-	
-	
+
+
 /*
       --I2B2
      UPDATE i2b2
@@ -50,9 +47,8 @@ BEGIN
     COMMIT;
 */
   END IF;
-  
+
 END;
- 
- 
+
+
 /
- 

@@ -97,7 +97,7 @@ BEGIN
 		COMMIT;
 
 		--if topNode != '' then
-		--	i2b2_create_concept_counts(topNode,jobId);
+
 		--end if;
 	end if;
 	

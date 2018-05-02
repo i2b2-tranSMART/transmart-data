@@ -1250,28 +1250,6 @@
     "child" : {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "CONCEPT_COUNTS"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "CONCEPT_COUNTS_BK"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
       "name" : "CONCEPT_DIMENSION"
     },
     "parents" : [ {
@@ -3560,10 +3538,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_DELETE_ALL_NODES"
     }, {
       "type" : "PROCEDURE",
@@ -3731,45 +3705,6 @@
     "child" : {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    },
-    "parents" : [ {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZ_END_AUDIT"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZ_ERROR_HANDLER"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZ_START_AUDIT"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "CZ_WRITE_AUDIT"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "OBSERVATION_FACT"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "PATIENT_DIMENSION"
-    } ]
-  }, {
-    "child" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_EXTERNAL_TABLES"
     },
     "parents" : [ ]
@@ -3880,10 +3815,6 @@
     "parents" : [ {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
       "name" : "CONCEPT_DIMENSION"
     }, {
       "type" : "PROCEDURE",
@@ -3921,10 +3852,6 @@
       "name" : "I2B2_DELETE_ALL_NODES"
     },
     "parents" : [ {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "CONCEPT_DIMENSION"
@@ -3991,10 +3918,6 @@
       "name" : "I2B2_HIDE_NODE"
     },
     "parents" : [ {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "I2B2"
@@ -4177,10 +4100,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -4321,10 +4240,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -4475,10 +4390,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -4615,10 +4526,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -5221,10 +5128,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -5353,10 +5256,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -5968,10 +5867,6 @@
     "parents" : [ {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
       "name" : "CONCEPT_DIMENSION"
     }, {
       "type" : "PROCEDURE",
@@ -6219,10 +6114,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -6339,10 +6230,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -6477,10 +6364,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -6608,10 +6491,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -6735,10 +6614,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -6859,10 +6734,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -6993,10 +6864,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -7124,10 +6991,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -7248,10 +7111,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7379,10 +7238,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7521,10 +7376,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -7633,10 +7484,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -7759,10 +7606,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -7871,10 +7714,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -8009,10 +7848,6 @@
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
       "name" : "I2B2_CREATE_SECURITY_FOR_TRIAL"
     }, {
       "type" : "PROCEDURE",
@@ -8137,10 +7972,6 @@
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_ADD_ROOT_NODE"
-    }, {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
     }, {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
@@ -8756,10 +8587,6 @@
       "name" : "I2B2_RENAME_NODE"
     },
     "parents" : [ {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "CONCEPT_COUNTS"
-    }, {
       "type" : "SYNONYM",
       "owner" : "TM_CZ",
       "name" : "CONCEPT_DIMENSION"
@@ -10638,10 +10465,6 @@
     "parents" : [ {
       "type" : "TABLE",
       "owner" : "I2B2DEMODATA",
-      "name" : "CONCEPT_COUNTS"
-    }, {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
       "name" : "CONCEPT_DIMENSION"
     }, {
       "type" : "TABLE",
@@ -10659,10 +10482,6 @@
       "name" : "RENAME_STUDY"
     },
     "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "CONCEPT_COUNTS"
-    }, {
       "type" : "TABLE",
       "owner" : "I2B2DEMODATA",
       "name" : "CONCEPT_DIMENSION"
@@ -13473,13 +13292,6 @@
       "name" : "I2B2_BULK_ADD_SEARCH_TERM"
     },
     "file" : "tm_cz/procedures/i2b2_bulk_add_search_term.sql"
-  }, {
-    "item" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_CREATE_CONCEPT_COUNTS"
-    },
-    "file" : "tm_cz/procedures/i2b2_create_concept_counts.sql"
   }, {
     "item" : {
       "type" : "PROCEDURE",

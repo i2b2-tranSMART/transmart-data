@@ -69,7 +69,7 @@ DECLARE
 		  where t.leaf_node = x.c_fullname);
 
 
---	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
 
   delNodes CURSOR FOR
   SELECT distinct c_fullname
@@ -1029,14 +1029,6 @@ begin
 	perform cz_write_audit(jobId,databaseName,procedureName,'Update visual attributes for study nodes in I2B2METADATA i2b2',rowCt,stepCt,'Done');
 
 
-  --Build concept Counts
-  --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
-  -- a unique top-level node for rbm data
-
-    perform tm_cz.i2b2_create_concept_counts(topNode ,jobID );
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done') into rtnCd;
-
 	--	delete each node that is hidden
 
 	 FOR r_delNodes in delNodes Loop
@@ -1061,7 +1053,7 @@ begin
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,tText,rowCt,stepCt,'Done') into rtnCd;
 
 	END LOOP;
-    
+
 
 --	tag data with probeset_id from reference.probeset_deapp
 

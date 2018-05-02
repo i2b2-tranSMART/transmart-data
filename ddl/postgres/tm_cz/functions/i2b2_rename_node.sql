@@ -56,18 +56,6 @@ BEGIN
   if old_node != ''  and old_node != '%' and new_node != ''  and new_node != '%'
   then
 
-	--	Update concept_counts paths
-
-	update concept_counts cc
-      set CONCEPT_PATH = replace(cc.concept_path, '\' || old_node || '\', '\' || new_node || '\'),
-	      parent_concept_path = replace(cc.parent_concept_path, '\' || old_node || '\', '\' || new_node || '\')
-      where cc.concept_path in
-		   (select cd.concept_path from concept_dimension cd
-		    where cd.sourcesystem_cd = trial_id
-              and cd.concept_path like '%' || old_node || '%');
-	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Update concept_counts with new path',SQL%ROWCOUNT,stepCt,'Done');
-
     COMMIT;
 
     --Update path in i2b2_tags

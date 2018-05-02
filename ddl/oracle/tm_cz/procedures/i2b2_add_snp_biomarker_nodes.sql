@@ -219,7 +219,7 @@ BEGIN
 
 --	fill in tree
 
-	--	get top level for study, this will be used for fill-in and create_concept_counts
+	--	get top level for study, this will be used for fill-in
 	--	if this fails, check to make sure the trialId is not a sourcesystem_cd at an higher level than the study
 
 	select b.c_fullname into nodeName
@@ -234,13 +234,6 @@ BEGIN
 	stepCt := stepCt + 1;
 	cz_write_audit(jobId,databaseName,procedureName,'Fill in tree for Biomarker Data for trial',SQL%ROWCOUNT,stepCt,'Done');
 
-  --Build concept Counts
-  --Also marks any i2B2 records with no underlying data as Hidden, need to do at Biomarker level because there may be multiple platforms and patient count can vary
-
-    i2b2_create_concept_counts(REGEXP_REPLACE(nodeName || '\','(\\){2,}', '\'),jobID );
-	stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done');
-	
   ---Cleanup OVERALL JOB if this proc is being run standalone
   IF newJobFlag = 1
   THEN

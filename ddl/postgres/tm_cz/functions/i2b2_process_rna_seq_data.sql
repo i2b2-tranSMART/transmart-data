@@ -66,7 +66,7 @@ DECLARE
 		  where t.leaf_node = x.c_fullname);
 
 
---	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
 
   delNodes CURSOR FOR
   SELECT distinct c_fullname
@@ -1008,24 +1008,6 @@ BEGIN
     stepCt := stepCt + 1;
 	select cz_write_audit(jobId,databaseName,procedureName,'Insert new probesets into probeset_deapp',rowCt,stepCt,'Done') into rtnCd;
 
-  --Build concept Counts
-  --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
-  -- a unique top-level node for RNA_sequencing data
-	begin
-    perform i2b2_create_concept_counts(topNode ,jobID );
-	get diagnostics rowCt := ROW_COUNT;
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		--Handle errors.
-		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
-		--End Proc
-		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
-		return -16;
-	end;
-	stepCt := stepCt + 1;
-	select cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',rowCt,stepCt,'Done') into rtnCd;
 
 	--	delete each node that is hidden
 	 FOR r_delNodes in delNodes Loop

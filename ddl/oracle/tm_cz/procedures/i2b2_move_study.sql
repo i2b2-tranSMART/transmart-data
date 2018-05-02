@@ -107,18 +107,6 @@ BEGIN
 		cz_write_audit(jobId,databaseName,procedureName,'Update i2b2 with new path',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
 
-		--	concept_counts
-
-		update concept_counts
-		set concept_path = replace(concept_path, old_path, newPath)
-		   ,parent_concept_path = replace(parent_concept_path, old_path, newPath)
-		where concept_path like old_path || '%';
-
-		--	update parent_concept_path for new_path (replace doesn't work)
-		update concept_counts
-		set parent_concept_path=ltrim(SUBSTR(concept_path, 1,instr(concept_path, '\',-1,2)))
-		where concept_path = newPath;
-
 		--	fill in any upper levels
 
 		i2b2_fill_in_tree(null, newPath, jobID);
@@ -141,14 +129,10 @@ BEGIN
 		cz_write_audit(jobId,databaseName,procedureName,'Update i2b2 with new dimcode and tooltip',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
 
-		if topNode != '' then
-			i2b2_fill_in_tree
-			i2b2_create_concept_counts(topNode,jobId);
-		end if;
 */
 	end if;
 
-	
+
 
 	IF newJobFlag = 1
 	THEN

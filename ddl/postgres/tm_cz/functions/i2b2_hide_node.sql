@@ -73,24 +73,7 @@ begin
 	end;
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Nodes hidden in i2b2metadata.i2b2',rowCt,stepCt,'Done') into rtnCd;
-
-
-	begin
-	delete from i2b2demodata.concept_counts
-	where concept_path like path || '%' escape '`';
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		--Handle errors.
-		select tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage) into rtnCd;
-		--End Proc
-		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
-		return -16;
-	get diagnostics rowCt := ROW_COUNT;
-	end;
-	stepCt := stepCt + 1;
-	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Deleted hidden nodes from i2b2demodata.concept_counts',rowCt,stepCt,'Done') into rtnCd;
+    
 
 	return 1;
 

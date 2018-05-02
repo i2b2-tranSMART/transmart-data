@@ -138,7 +138,7 @@ AS
 		  where t.leaf_node = x.c_fullname);
 
 
---	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
 
   CURSOR delNodes is
   select distinct c_fullname
@@ -1312,7 +1312,6 @@ BEGIN
   --Also marks any i2B2 records with no underlying data as Hidden, need to do at Trial level because there may be multiple platform and there is no longer
   -- a unique top-level node for mRNA data
 
-    i2b2_create_concept_counts(topNode ,jobID );
 	stepCt := stepCt + 1;
 	cz_write_audit(jobId,databaseName,procedureName,'Create concept counts',0,stepCt,'Done');
 

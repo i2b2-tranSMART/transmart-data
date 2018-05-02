@@ -44,7 +44,6 @@
 \i tm_cz/functions/i2b2_add_snp_biomarker_nodes.sql
 \i tm_cz/functions/i2b2_backout_trial.sql
 \i tm_cz/functions/i2b2_bulk_add_search_term.sql
-\i tm_cz/functions/i2b2_create_concept_counts.sql
 \i tm_cz/functions/i2b2_create_external_tables.sql
 \i tm_cz/functions/i2b2_create_security_for_trial.sql
 \i tm_cz/functions/i2b2_create_security_inc_trial.sql

@@ -24,7 +24,7 @@ Declare
   root_node		varchar(2000);
   root_level	integer;
   rtnCd			integer;
-  
+
 	--Audit variables
 	newJobFlag		integer;
 	databaseName 	VARCHAR(100);
@@ -34,18 +34,18 @@ Declare
 	rowCt			numeric(18,0);
 	errorNumber		character varying;
 	errorMessage	character varying;
-  
+
 BEGIN
-    
+
 	stepCt := 0;
-	
+
 	--Set Audit Parameters
 	newJobFlag := 0; -- False (Default)
 	jobID := currentJobID;
 
 	databaseName := 'TM_CZ';
 	procedureName := 'I2B2_ADD_NODE';
-	
+
 	--Audit JOB Initialization
 	--If Job ID does not exist, then this is a single procedure run and we need to create it
 	IF(jobID IS NULL or jobID < 1)
@@ -53,16 +53,16 @@ BEGIN
 		newJobFlag := 1; -- True
 		select tm_cz.cz_start_audit (procedureName, databaseName) into jobId;
 	END IF;
-  
+
 	select tm_cz.parse_nth_value(path, 2, '\') into root_node;
-	
+
 	select c_hlevel into root_level
 	from i2b2metadata.table_access
 	where c_name = root_node;
-  
+
 	if old_path != ''  or old_path != '%' or new_path != ''  or new_path != '%'
-	then 
-	
+	then
+
       --CONCEPT DIMENSION
 		update concept_dimension
 		set CONCEPT_PATH = replace(concept_path, old_path, new_path)
@@ -74,7 +74,7 @@ BEGIN
 
 
 
-    
+
 		--I2B2
 		update i2b2
 		set c_fullname = replace(c_fullname, old_path, new_path)
@@ -87,23 +87,15 @@ BEGIN
 		select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'Update i2b2 with new path',rowCt,stepCt,'Done') into rtnCd;
 
 
-
-		
-		--	concept_counts
-		
-		update concept_counts
-		set concept_path = replace(concept_path, old_path, new_path)
-		   ,parent_concept_path = replace(parent_concept_path, old_path, new_path)
-		where concept_path like old_path || '%';
-		
+	
 		--	fill in any upper levels
-		
+
 		select i2b2_fill_in_tree(null, new_path, jobID);
 	END IF;
 
 
 
-		
+
       ---Cleanup OVERALL JOB if this proc is being run standalone
 	IF newJobFlag = 1
 	THEN
@@ -111,7 +103,7 @@ BEGIN
 	END IF;
 
 	return 1;
-	
+
 	EXCEPTION
 	WHEN OTHERS THEN
 		errorNumber := SQLSTATE;
@@ -122,8 +114,7 @@ BEGIN
 		select tm_cz.cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return -16;
 
-  
+
 END;
 
 $$;
-

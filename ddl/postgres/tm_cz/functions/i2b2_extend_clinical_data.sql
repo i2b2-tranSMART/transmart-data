@@ -57,7 +57,7 @@ Declare
 	select DISTINCT leaf_node, node_name
 	from  tm_wz.wt_trial_nodes a;
 
-	--	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+	--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
 
 	delNodes CURSOR is
 	select distinct c_fullname
@@ -1083,8 +1083,6 @@ select count(*) into pExists from i2b2demodata.observation_fact of where (of.pat
 	--	set sourcesystem_cd, c_comment to null if any added upper-level nodes
 
 
-	select tm_cz.i2b2_create_concept_counts(topNode, jobID) into rtnCd;
-
 	--	delete each node that is hidden after create concept counts
 
 	 FOR r_delNodes in delNodes Loop
@@ -1099,7 +1097,7 @@ select count(*) into pExists from i2b2demodata.observation_fact of where (of.pat
 	END LOOP;
 
 	select tm_cz.i2b2_create_security_for_trial(TrialId, secureStudy, jobID) into rtnCd;
-	
+
 	stepCt := stepCt + 1;
 	select tm_cz.cz_write_audit(jobId,databaseName,procedureName,'End i2b2_extend_clinical_data',0,stepCt,'Done') into rtnCd;
 

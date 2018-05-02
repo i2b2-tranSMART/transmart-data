@@ -80,14 +80,6 @@ Begin
 		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2METADATA i2b2',SQL%ROWCOUNT,stepCt,'Done');
 		COMMIT;
 
-		--concept_counts
-		  DELETE
-			FROM concept_counts
-		  WHERE
-			concept_path LIKE PATH || '%';
-		  stepCt := stepCt + 1;
-		  cz_write_audit(jobId,databaseName,procedureName,'Delete data for trial from I2B2DEMODATA concept_counts',SQL%ROWCOUNT,stepCt,'Done');
-		COMMIT;
     end if;
 
 END;

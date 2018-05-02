@@ -78,15 +78,6 @@ begin
 	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2METADATA i2b2',SQL%ROWCOUNT,stepCt,'Done');
     COMMIT;
 
-  --concept_counts
-      DELETE
-        FROM concept_counts
-      WHERE
-        concept_path = PATH;
-	stepCt := stepCt + 1;
-	czx_write_audit(jobId,databaseName,procedureName,'Delete data for node from I2B2DEMODATA concept_counts',SQL%ROWCOUNT,stepCt,'Done');
-    COMMIT;
-
   END IF;
 
     ---Cleanup OVERALL JOB if this proc is being run standalone

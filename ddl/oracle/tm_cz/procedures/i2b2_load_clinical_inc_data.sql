@@ -53,7 +53,7 @@ This procedure is created for incremental data load for clinical data
   from  wt_trial_nodes a
   ;
 
-	--	cursor to define the path for delete_one_node  this will delete any nodes that are hidden after i2b2_create_concept_counts
+	--	cursor to define the path for delete_one_node  this will delete any nodes that are hidden
 
 	CURSOR delNodes is
 	select distinct c_fullname
@@ -1123,7 +1123,6 @@ SET  --Static XML String
 		cz_write_audit(jobId,databaseName,procedureName,'Set P visualattribute for parent node: '|| root_node,SQL%ROWCOUNT,stepCt,'Done');
 	end loop;
 
-	i2b2_create_concept_counts(topNode, jobID);
 
 	-- inc-change retain hidden nodes
 
@@ -1144,7 +1143,7 @@ SET  --Static XML String
         */
 
 	i2b2_create_security_inc_trial(TrialId, secureStudy, jobID);
-  
+
   -- Performace fix recreated INDEX
   -- execute immediate('CREATE UNIQUE INDEX "I2B2DEMODATA"."OB_FACT_PK" ON "I2B2DEMODATA"."OBSERVATION_FACT" ("ENCOUNTER_NUM", "PATIENT_NUM", "CONCEPT_CD", "PROVIDER_ID", "START_DATE", "MODIFIER_CD")');
   -- execute immediate('CREATE INDEX "I2B2DEMODATA"."IDX_OB_FACT_1" ON "I2B2DEMODATA"."OBSERVATION_FACT" ( "CONCEPT_CD" )');
