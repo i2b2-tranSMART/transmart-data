@@ -90,7 +90,6 @@
 \i tm_cz/functions/i2b2_rna_seq_zscore_calc.sql
 \i tm_cz/functions/i2b2_secure_study.sql
 \i tm_cz/functions/i2b2_show_node.sql
-\i tm_cz/functions/i2b2_table_bkp.sql
 \i tm_cz/functions/i2b2_table_defrag.sql
 \i tm_cz/functions/i2b2_truncate_release_tables.sql
 \i tm_cz/functions/instr.sql

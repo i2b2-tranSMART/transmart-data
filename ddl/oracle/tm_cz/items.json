@@ -3646,17 +3646,6 @@
     } ]
   }, {
     "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_BK"
-    } ]
-  }, {
-    "child" : {
       "type" : "PROCEDURE",
       "owner" : "TM_CZ",
       "name" : "I2B2_BULK_ADD_SEARCH_TERM"
@@ -9887,17 +9876,6 @@
     } ]
   }, {
     "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "OBSERVATION_FACT_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "OBSERVATION_FACT_BK"
-    } ]
-  }, {
-    "child" : {
       "type" : "TABLE",
       "owner" : "TM_CZ",
       "name" : "OBSERVATION_FACT_RELEASE"
@@ -13820,13 +13798,6 @@
       "name" : "I2B2_SHOW_NODE"
     },
     "file" : "tm_cz/procedures/i2b2_show_node.sql"
-  }, {
-    "item" : {
-      "type" : "PROCEDURE",
-      "owner" : "TM_CZ",
-      "name" : "I2B2_TABLE_BKP"
-    },
-    "file" : "tm_cz/procedures/i2b2_table_bkp.sql"
   }, {
     "item" : {
       "type" : "PROCEDURE",

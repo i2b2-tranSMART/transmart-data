@@ -3318,17 +3318,6 @@
     "child" : {
       "type" : "SYNONYM",
       "owner" : "BIOMART_USER",
-      "name" : "I2B2_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2METADATA",
-      "name" : "I2B2_BK"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "BIOMART_USER",
       "name" : "I2B2_ID_SEQ"
     },
     "parents" : [ {
@@ -3742,17 +3731,6 @@
       "type" : "TABLE",
       "owner" : "I2B2DEMODATA",
       "name" : "OBSERVATION_FACT"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "BIOMART_USER",
-      "name" : "OBSERVATION_FACT_BK"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "OBSERVATION_FACT_BK"
     } ]
   }, {
     "child" : {
