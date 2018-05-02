@@ -74,7 +74,7 @@ Declare
 		  where t.leaf_node = x.c_fullname);
 
 
---	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
+--	cursor to define the path for delete_one_node  this will delete any nodes that are hidden
 
   delNodes CURSOR FOR
   SELECT distinct c_fullname

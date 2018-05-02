@@ -50,7 +50,7 @@ Declare
 	select DISTINCT leaf_node, node_name
 	from  tm_wz.wt_trial_nodes a;
 
-	--	cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
+	--	cursor to define the path for delete_one_node  this will delete any nodes that are hidden
 
 	delNodes CURSOR is
 	select distinct c_fullname

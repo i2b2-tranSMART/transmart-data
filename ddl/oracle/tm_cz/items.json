@@ -164,28 +164,6 @@
     } ]
   }, {
     "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "ASYNC_JOB"
-    },
-    "parents" : [ {
-      "type" : "TABLE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "ASYNC_JOB"
-    } ]
-  }, {
-    "child" : {
-      "type" : "SYNONYM",
-      "owner" : "TM_CZ",
-      "name" : "ASYNC_JOB_SEQ"
-    },
-    "parents" : [ {
-      "type" : "SEQUENCE",
-      "owner" : "I2B2DEMODATA",
-      "name" : "ASYNC_JOB_SEQ"
-    } ]
-  }, {
-    "child" : {
       "type" : "TABLE",
       "owner" : "TM_CZ",
       "name" : "AZ_TEST_COMPARISON_INFO"

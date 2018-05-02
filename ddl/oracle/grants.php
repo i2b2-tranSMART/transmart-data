@@ -23,7 +23,6 @@ $spec = [
         ['I2B2DEMODATA', 'QT_QUERY_INSTANCE',         'WRITE', ''],
         ['I2B2DEMODATA', 'QT_QUERY_RESULT_INSTANCE',  'WRITE', ''],
         ['I2B2DEMODATA', 'QT_PATIENT_SET_COLLECTION', 'WRITE', ''],
-        ['I2B2DEMODATA', 'ASYNC_JOB',                 'WRITE', ''],
         ['I2B2DEMODATA', '*SEQUENCE',                 'READ', ''],
         ['DEAPP',        'DE_SAVED_COMPARISON',       'WRITE', ''],
         ['BIOMART',      'BIO_ASSAY_FEATURE_GROUP',   'WRITE', ''],

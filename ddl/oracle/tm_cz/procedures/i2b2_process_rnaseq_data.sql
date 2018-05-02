@@ -80,7 +80,7 @@ AS
       from  wt_mrna_nodes t
 	where not exists (select 1 from i2b2 x where t.leaf_node = x.c_fullname);
 
-  -- cursor to define the path for delete_one_node  this will delete any nodes that are\shidden
+  -- cursor to define the path for delete_one_node  this will delete any nodes that are hidden
   CURSOR delNodes is
     select distinct c_fullname
       from  i2b2 where c_fullname like topNode || '%'  and
