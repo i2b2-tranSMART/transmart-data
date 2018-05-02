@@ -1,7 +1,7 @@
 --
 -- Type: PROCEDURE; Owner: TM_CZ; Name: I2B2_ADD_ROOT_NODE
 --
-  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_ADD_ROOT_NODE" 
+  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_ADD_ROOT_NODE"
 (root_node		varchar2
 ,currentJobID	NUMBER := null
 ) AUTHID CURRENT_USER
@@ -21,7 +21,7 @@ AS
 * See the License for the specific language governing permissions and
 * limitations under the License.
 ******************************************************************/
-	
+
 	--Audit variables
 	newJobFlag 	INTEGER(1);
 	databaseName 	VARCHAR(100);
@@ -31,13 +31,13 @@ AS
 
 	rootNode	varchar2(200);
 	rootPath	varchar2(200);
-	
+
 Begin
 	rootNode := root_node;
 	rootPath := '\' || rootNode || '\';
 
     stepCt := 0;
-	
+
 	--Set Audit Parameters
 	newJobFlag := 0; -- False (Default)
 	jobID := currentJobID;
@@ -52,10 +52,10 @@ Begin
 		newJobFlag := 1; -- True
 		czx_start_audit (procedureName, databaseName, jobID);
 	END IF;
-	
+
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Start ' || procedureName,0,stepCt,'Done');
-	
+
 	insert into table_access
 	select rootNode as c_table_cd
 		  ,'i2b2' as c_table_name
@@ -84,13 +84,13 @@ Begin
 	where not exists
 		(select 1 from table_access x
 		 where x.c_table_cd = rootNode);
-	
+
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Insert to table_access',SQL%ROWCOUNT,stepCt,'Done');
-    COMMIT;	
+    COMMIT;
 
 	--	insert root_node into i2b2
-	
+
 	insert into i2b2
 	(c_hlevel
 	,c_fullname
@@ -113,7 +113,6 @@ Begin
 	,import_date
 	,sourcesystem_cd
 	,valuetype_cd
-	,i2b2_id
 	)
 	select 0 as c_hlevel
 		  ,rootPath as c_fullname
@@ -136,19 +135,18 @@ Begin
 		  ,sysdate as import_date
 		  ,null as sourcesystem_cd
 		  ,null as valuetype_cd
-		  ,I2B2_ID_SEQ.nextval as i2b2_id
 	from dual
 	where not exists
 		 (select 1 from i2b2 x
 		  where x.c_name = rootNode);
-		  
+
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'Insert root_node ' || rootNode || ' to i2b2',SQL%ROWCOUNT,stepCt,'Done');
-    COMMIT;	
-			
+    COMMIT;
+
 	stepCt := stepCt + 1;
 	czx_write_audit(jobId,databaseName,procedureName,'End ' || procedureName,0,stepCt,'Done');
-	
+
     COMMIT;
 	--Cleanup OVERALL JOB if this proc is being run standalone
 	IF newJobFlag = 1
@@ -162,7 +160,6 @@ Begin
 		czx_error_handler (jobID, procedureName);
 		--End Proc
 		czx_end_audit (jobID, 'FAIL');
-	
+
 END;
 /
- 

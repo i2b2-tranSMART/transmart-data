@@ -718,7 +718,7 @@ BEGIN
      import_date,
      sourcesystem_cd
     )
-    select seq_patient_num.nextval,
+    select sq_up_patdim_patientnum.nextval,
 		   t.sex_cd,
 		   t.age_in_years_num,
 		   t.race_cd,
@@ -766,23 +766,19 @@ BEGIN
 	commit;
 
 	insert into concept_dimension
-    (concept_cd
-	,concept_path
+    (concept_path
 	,name_char
 	,update_date
 	,download_date
 	,import_date
 	,sourcesystem_cd
-	,table_name
 	)
-    select concept_id.nextval
-	     ,x.leaf_node
+    select x.leaf_node
 		 ,x.node_name
 		 ,etlDate
 		 ,etlDate
 		 ,etlDate
 		 ,TrialId
-		 ,'CONCEPT_DIMENSION'
 	from (select distinct c.leaf_node
 				,to_char(c.node_name) as node_name
 		  from wt_trial_nodes c
@@ -836,7 +832,6 @@ BEGIN
 	,c_operator
 	,c_columndatatype
 	,c_comment
-	,i2b2_id
 	,c_metadataxml
 	)
     select /*+ parallel(concept_dimension, 8) */ (length(c.concept_path) - nvl(length(replace(c.concept_path, '\')),0)) / length('\') - 2 + root_level
@@ -857,7 +852,6 @@ BEGIN
 		  ,'LIKE'
 		  ,'T'		-- if i2b2 gets fixed to respect c_columndatatype then change to t.data_type
 		  ,'trial:' || TrialID
-		  ,i2b2_id_seq.nextval
 		  ,case when t.data_type = 'T' then null
 		   else '<?xml version="1.0"?><ValueMetadata><Version>3.02</Version><CreationDateTime>08/14/2008 01:22:59</CreationDateTime><TestID></TestID><TestName></TestName><DataType>PosFloat</DataType><CodeType></CodeType><Loinc></Loinc><Flagstouse></Flagstouse><Oktousevalues>Y</Oktousevalues><MaxStringLength></MaxStringLength><LowofLowValue>0</LowofLowValue><HighofLowValue>0</HighofLowValue><LowofHighValue>100</LowofHighValue>100<HighofHighValue>100</HighofHighValue><LowofToxicValue></LowofToxicValue><HighofToxicValue></HighofToxicValue><EnumValues></EnumValues><CommentsDeterminingExclusion><Com></Com></CommentsDeterminingExclusion><UnitValues><NormalUnits>ratio</NormalUnits><EqualUnits></EqualUnits><ExcludingUnits></ExcludingUnits><ConvertingUnits><Units></Units><MultiplyingFactor></MultiplyingFactor></ConvertingUnits></UnitValues><Analysis><Enums /><Counts /><New /></Analysis></ValueMetadata>'
 		   end
