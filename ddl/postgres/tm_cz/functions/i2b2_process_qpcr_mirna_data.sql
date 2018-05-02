@@ -903,27 +903,6 @@ BEGIN
 		return -16;
 	end;
 
-	 ---INSERT sample_dimension
-      stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
-      perform cz_write_audit(jobId,databaseName,procedureName,'Initialize data_type and xml in i2b2',rowCt,stepCt,'Done');
-
-	  begin
-      INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
-         SELECT DISTINCT SAMPLE_CD FROM
-           DEAPP.DE_SUBJECT_SAMPLE_MAPPING WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) ;
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		perform tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage);
-		perform tm_cz.cz_end_audit (jobID, 'FAIL');
-		return -16;
-	end;
-
-	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
-	perform cz_write_audit(jobId,databaseName,procedureName,'insert distinct sample_cd in sample_dimension from de_subject_sample_mapping',rowCt,stepCt,'Done');
-
-
     ---- update c_metedataxml in i2b2
  begin
    for ul in uploadI2b2 loop

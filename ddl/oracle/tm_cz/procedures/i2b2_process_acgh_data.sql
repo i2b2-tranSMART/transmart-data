@@ -759,11 +759,6 @@ BEGIN
   cz_write_audit(jobId,databaseName,procedureName,'Insert sample facts into I2B2DEMODATA observation_fact',SQL%ROWCOUNT,stepCt,'Done');
   commit;
 
-  ---INSERT sample_dimension
-  INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
-         SELECT DISTINCT SAMPLE_CD FROM
-           DEAPP.DE_SUBJECT_SAMPLE_MAPPING WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) ;
-
   --Update I2b2 for correct data type
   update i2b2 t
 	set c_columndatatype = 'T', c_metadataxml = null, c_visualattributes='FA'

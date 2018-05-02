@@ -741,7 +741,7 @@ BEGIN
      import_date,
      sourcesystem_cd
     )
-    select seq_patient_num.nextval,
+    select sq_up_patdim_patientnum.nextval,
 		   t.sex_cd,
 		   t.age_in_years_num,
 		   t.race_cd,
@@ -789,8 +789,7 @@ BEGIN
 
 	commit;
 	insert into concept_dimension
-    (concept_cd
-	,concept_path
+    (concept_path
 	,name_char
 	,update_date
 	,download_date
@@ -798,8 +797,7 @@ BEGIN
 	,sourcesystem_cd
 	,table_name
 	)
-    select concept_id.nextval
-	     ,x.leaf_node
+    select x.leaf_node
 		 ,x.node_name
 		 ,etlDate
 		 ,etlDate
@@ -972,15 +970,6 @@ SET  --Static XML String
 	cz_write_audit(jobId,databaseName,procedureName,'Delete clinical data for study from observation_fact',SQL%ROWCOUNT,stepCt,'Done');
 	COMMIT;
 
-
-
-	-- insert data in to sample dimentions - Changes made for requirements 1 and 2
-
- INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
-  SELECT DISTINCT SAMPLE_CD FROM
-           wrk_clinical_data WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) and  SAMPLE_CD is not null ;
-   stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Inserted sample code into Sample Dimension table',SQL%ROWCOUNT,stepCt,'Done');
 
 
     --Insert into observation_fact

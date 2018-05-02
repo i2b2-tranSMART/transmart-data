@@ -1,7 +1,7 @@
 --
 -- Type: PROCEDURE; Owner: TM_CZ; Name: I2B2_PROCESS_RNASEQ_DATA
 --
-  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_PROCESS_RNASEQ_DATA" 
+  CREATE OR REPLACE PROCEDURE "TM_CZ"."I2B2_PROCESS_RNASEQ_DATA"
 (
   trial_id 	VARCHAR2
  ,top_node	varchar2
@@ -759,11 +759,6 @@ BEGIN
   cz_write_audit(jobId,databaseName,procedureName,'Insert sample facts into I2B2DEMODATA observation_fact',SQL%ROWCOUNT,stepCt,'Done');
   commit;
 
-  ---INSERT sample_dimension
-  INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
-         SELECT DISTINCT SAMPLE_CD FROM
-           DEAPP.DE_SUBJECT_SAMPLE_MAPPING WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) ;
-
   --Update I2b2 for correct data type
   update i2b2 t
 	set c_columndatatype = 'T', c_metadataxml = null, c_visualattributes='FA'
@@ -835,7 +830,7 @@ BEGIN
 
   --Reload Security: Inserts one record for every I2B2 record into the security table
 
-  
+
   stepCt := stepCt + 1;
   cz_write_audit(jobId,databaseName,procedureName,'Load security data',0,stepCt,'Done');
 

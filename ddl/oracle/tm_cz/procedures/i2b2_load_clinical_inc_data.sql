@@ -973,14 +973,6 @@ SET  --Static XML String
 
 
 
-	-- insert data in to sample dimentions - Changes made for requirements 1 and 2
-
- INSERT INTO I2B2DEMODATA.SAMPLE_DIMENSION(SAMPLE_CD)
-  SELECT DISTINCT SAMPLE_CD FROM
-           wrk_clinical_data WHERE SAMPLE_CD NOT IN (SELECT SAMPLE_CD FROM I2B2DEMODATA.SAMPLE_DIMENSION) and  SAMPLE_CD is not null ;
-   stepCt := stepCt + 1;
-	cz_write_audit(jobId,databaseName,procedureName,'Inserted sample code into Sample Dimension table',SQL%ROWCOUNT,stepCt,'Done');
-
 
     --Insert into observation_fact
 	--  -- Performace fix set nologging  and modified query , added sample code
