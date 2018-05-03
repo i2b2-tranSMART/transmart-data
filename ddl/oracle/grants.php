@@ -56,6 +56,8 @@ $spec = [
         ['AMAPP',        '*TABLE',             'FULL', ''],
         ['GALAXY',       '*TABLE',             'FULL', ''],
         ['GALAXY',       '*SEQUENCE',          'READ', ''],
+        // required privileges for the procedures TM_CZ.I2B2_MOVE_ANALYSIS_TO_PROD and I2B2_MOVE_ANALYSIS_TO_PROD_NEW -Andre
+        ['BIOMART_STAGE', '*TABLE',            'FULL', '']
     ],
     'SEARCHAPP' => [
         ['BIOMART', 'BIO_ASSAY_DATA_ANNOTATION', 'READ', 'GRANT_OPTION'],

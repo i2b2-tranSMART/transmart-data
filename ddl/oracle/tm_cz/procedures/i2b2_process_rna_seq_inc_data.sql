@@ -270,7 +270,7 @@ BEGIN
 	--	Delete existing observation_fact data, will be repopulated
 
 	delete from observation_fact obf
-	where (obf.sample_cd||obf.patient_num) in
+	where (obf.patient_num) in
 		 (select distinct (x.sample_cd||x.patient_id)
 		  from de_subject_sample_mapping x
 		  where x.trial_name = TrialId
