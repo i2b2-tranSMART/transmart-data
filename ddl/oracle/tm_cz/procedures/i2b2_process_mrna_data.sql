@@ -251,7 +251,7 @@ EXECUTE IMMEDIATE 'alter session set NLS_NUMERIC_CHARACTERS=".,"';
       import_date,
       sourcesystem_cd
     )
-    select seq_patient_num.nextval
+    select sq_up_patdim_patientnum.nextval
 		  ,x.sex_cd
 		  ,x.age_in_years_num
 		  ,x.race_cd
@@ -748,7 +748,7 @@ EXECUTE IMMEDIATE 'alter session set NLS_NUMERIC_CHARACTERS=".,"';
 		  ,'@'
 		  ,'@'
 		  ,'' -- no units available
---                  ,m.sample_cd
+--
                   ,1
     from  de_subject_sample_mapping m
     where m.trial_name = TrialID
@@ -775,7 +775,6 @@ EXECUTE IMMEDIATE 'alter session set NLS_NUMERIC_CHARACTERS=".,"';
 	,provider_id
 	,location_cd
 	,units_cd
-  ,sample_cd
   ,instance_num
     )
     select distinct m.sample_id
@@ -790,7 +789,7 @@ EXECUTE IMMEDIATE 'alter session set NLS_NUMERIC_CHARACTERS=".,"';
 		  ,'@'
 		  ,'@'
 		  ,'' -- no units available
-      ,m.sample_cd
+
       ,1
     from  de_subject_sample_mapping m
     where m.trial_name = TrialID

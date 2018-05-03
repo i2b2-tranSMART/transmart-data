@@ -66,7 +66,7 @@ BEGIN
       import_date,
       sourcesystem_cd
     )
-    select seq_patient_num.nextval,
+    select sq_up_patdim_patientnum.nextval,
 		   null as sex_cd,
 		   0 as age_in_years_num,
 		   null as race_cd,

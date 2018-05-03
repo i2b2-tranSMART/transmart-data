@@ -248,7 +248,7 @@ BEGIN
       import_date,
       sourcesystem_cd
     )
-    select seq_patient_num.nextval
+    select sq_up_patdim_patientnum.nextval
 		  ,x.sex_cd
 		  ,x.age_in_years_num
 		  ,x.race_cd
@@ -284,7 +284,7 @@ BEGIN
 	--	Delete existing observation_fact data, will be repopulated
 
 	delete from observation_fact obf
-	where (obf.sample_cd||obf.patient_num) in
+	where (obf.patient_num) in
 		 (select distinct (x.sample_cd||x.patient_id)
 		  from de_subject_sample_mapping x
 		  where x.trial_name = TrialId
@@ -747,7 +747,6 @@ BEGIN
 	,provider_id
 	,location_cd
 	,units_cd
-        ,sample_cd
         ,INSTANCE_NUM
     )
     select distinct m.patient_id
@@ -762,7 +761,7 @@ BEGIN
 		  ,'@'
 		  ,'@'
 		  ,'' -- no units available
-                  ,m.sample_cd
+                  
                   ,1
     from  de_subject_sample_mapping m
     where m.trial_name = TrialID
@@ -790,7 +789,6 @@ BEGIN
 	,provider_id
 	,location_cd
 	,units_cd
-        ,sample_cd
         ,INSTANCE_NUM
     )
     select distinct m.sample_id
@@ -805,7 +803,7 @@ BEGIN
 		  ,'@'
 		  ,'@'
 		  ,'' -- no units available
-                  ,m.sample_cd
+                  
                   ,1
     from  de_subject_sample_mapping m
     where m.trial_name = TrialID
