@@ -19,6 +19,7 @@ CREATE FUNCTION i2b2_process_qpcr_mirna_data(trial_id character varying, top_nod
 --		tissue_type	=>	sample_type
 --		attribute_1	=>	tissue_type
 --		atrribute_2	=>	timepoint	
+
 Declare
   TrialID		varchar(100);
   RootNode		varchar(2000);
@@ -36,7 +37,6 @@ Declare
   gplTitle		varchar(1000);
   pExists		numeric;
   partTbl   	numeric;
-  partExists 	numeric;
   sampleCt		numeric;
   idxExists 	numeric;
   logBase		numeric;
@@ -49,8 +49,8 @@ Declare
   
     --Audit variables
   newJobFlag numeric(1);
-  databaseName VARCHAR(100);
-  procedureName VARCHAR(100);
+  databaseName varchar(100);
+  procedureName varchar(100);
   jobID numeric(18,0);
   stepCt numeric(18,0);
   rowCt	integer;
@@ -121,7 +121,7 @@ BEGIN
   END IF;
     	
 	stepCt := 0;
-	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
+	stepCt := stepCt + 1;
 	perform cz_write_audit(jobId,databaseName,procedureName,'Starting i2b2_process_qpcr_mirna_data',0,stepCt,'Done');
 	
 	--	Get count of records in LT_SRC_MIRNA_SUBJ_SAMP_MAP
@@ -160,7 +160,7 @@ BEGIN
 	where platform in (select distinct m.platform from LT_SRC_MIRNA_SUBJ_SAMP_MAP m);
 	
 	if PCOUNT = 0 then
-		perform cz_write_audit(jobId,databasename,procedurename,'No platoform in de_gpl_info',1,stepCt,'ERROR');
+		perform cz_write_audit(jobId,databasename,procedurename,'No platform in de_gpl_info',1,stepCt,'ERROR');
 		perform cz_error_handler(jobid,procedurename, '-1', 'Application raised error');
 		perform cz_end_audit (jobId,'FAIL');
 		return 163;
@@ -253,7 +253,7 @@ BEGIN
 		  ,current_timestamp
 		  ,x.sourcesystem_cd
 	from (select distinct 'Unknown' as sex_cd,
-				 0 as age_in_years_num,
+				 null::integer as age_in_years_num,
 				 null as race_cd,
 				 regexp_replace(TrialID || ':' || coalesce(s.site_id,'') || ':' || s.subject_id,'(::){1,}', ':', 'g') as sourcesystem_cd
 		 from LT_SRC_MIRNA_SUBJ_SAMP_MAP s
@@ -315,37 +315,6 @@ BEGIN
 	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
 	perform cz_write_audit(jobId,databaseName,procedureName,'Delete data from observation_fact',rowCt,stepCt,'Done');
 	
-        begin
-	delete from de_subject_mirna_data
-	where trial_source = TrialId || ':' || sourceCd;
-	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
-	perform cz_write_audit(jobId,databaseName,procedureName,'Delete data from de_subject_mirna_data',rowCt,stepCt,'Done');
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		perform tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage);	
-		perform tm_cz.cz_end_audit (jobID, 'FAIL');
-		return -16;
-	end;
-
-	begin
-	delete from deapp.DE_SUBJECT_SAMPLE_MAPPING d 
-	where trial_name = TrialID 
-	  and coalesce(d.source_cd,'STD') = sourceCd
-	  and platform = mirna_type;
-	exception
-	when others then
-		errorNumber := SQLSTATE;
-		errorMessage := SQLERRM;
-		perform tm_cz.cz_error_handler (jobID, procedureName, errorNumber, errorMessage);	
-		perform tm_cz.cz_end_audit (jobID, 'FAIL');
-		return -16;
-	end;
-	  
-	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
-	perform cz_write_audit(jobId,databaseName,procedureName,'Delete trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done');
-
 	begin
 		execute('truncate table tm_wz.WT_QPCR_MIRNA_NODES');
 	exception
@@ -1162,7 +1131,7 @@ BEGIN
 
     ---Cleanup OVERALL JOB if this proc is being run standalone
 	
-	stepCt := stepCt + 1; get diagnostics rowCt := ROW_COUNT;
+	stepCt := stepCt + 1;
 	perform cz_write_audit(jobId,databaseName,procedureName,'End i2b2_process_QPCR_miRNA_DATA',0,stepCt,'Done');
 
 	IF newJobFlag = 1

@@ -18,7 +18,7 @@ CREATE TABLE i2b2_secure (
     c_dimcode character varying(900),
     c_comment text,
     c_tooltip character varying(900),
-    m_applied_path character varying(700),
+    m_applied_path character varying(700) DEFAULT '@'::character varying,
     update_date timestamp without time zone,
     download_date timestamp without time zone,
     import_date timestamp without time zone,
@@ -35,4 +35,9 @@ CREATE TABLE i2b2_secure (
 -- Name: idx_i2b2_secure_fullname; Type: INDEX; Schema: i2b2metadata; Owner: -
 --
 CREATE INDEX idx_i2b2_secure_fullname ON i2b2_secure USING btree (c_fullname);
+
+--
+-- Name: idx_i2b2_secure_fullname; Type: INDEX; Schema: i2b2metadata; Owner: -
+--
+CREATE INDEX i2b2_secure_srcsystem_cd_idx ON i2b2_secure USING btree (sourcesystem_cd);
 

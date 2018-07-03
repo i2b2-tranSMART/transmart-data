@@ -73,13 +73,13 @@ def cross(List l1, List l2, Closure op) {
     }
     ret
 }
-def colSize =  [ 15, 0, 4, 6, 20, 10]
+def colSize =  [ 30, 0, 4, 8, 19, 10]
 def colAlign = [ '-', '-', '-', '', '', '']
 colSize[1] = cols - colSize.sum() - (colSize.size() - 1) * 3
 def printfSpec = cross(colSize, colAlign, { a, b -> "%${b}${a}.${a}s" }).join(' | ') + '\n'
 
 printf printfSpec,
-        'Procedure', 'Description', 'Stat', 'Recs', 'Date', 'Time spent'
+        'Procedure', 'Description', 'Stat', 'Records', 'Date', 'Time spent'
 println separator
 
 sql.eachRow "SELECT procedure_name, step_desc, step_status, records_manipulated, job_date, time_elapsed_secs " +
@@ -89,6 +89,8 @@ sql.eachRow "SELECT procedure_name, step_desc, step_status, records_manipulated,
         /* for Oracle it's an oracle.sql.TIMESTAMPLTZ */
         itCop[4] = itCop[4].dateValue(sql.connection).dateTimeString
     }
+    /* some procedures fail to define a procedure name! */
+    if (itCop[0] == null) {itCop[0] = ''}
     if (itCop[0].size() > colSize[0]) {
         itCop[0] = itCop[0].substring(itCop[0].length() - colSize[0])
     }

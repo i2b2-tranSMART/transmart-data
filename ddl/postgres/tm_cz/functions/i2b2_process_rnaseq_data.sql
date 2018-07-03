@@ -2,7 +2,7 @@
 -- Name: i2b2_process_rnaseq_data(character varying, character varying, character varying, character varying, character varying, numeric, numeric); Type: FUNCTION; Schema: tm_cz; Owner: -
 --
 
-CREATE FUNCTION tm_cz.i2b2_process_rnaseq_data(trial_id character varying, top_node character varying, source_cd character varying DEFAULT 'STD'::character varying, secure_study character varying DEFAULT 'N'::character varying, data_type character varying DEFAULT 'R'::character varying, log_base numeric DEFAULT 2, currentjobid numeric DEFAULT (-1))
+CREATE FUNCTION tm_cz.i2b2_process_rnaseq_data(trial_id character varying, top_node character varying, source_cd character varying DEFAULT 'STD'::character varying, secure_study character varying DEFAULT 'N'::character varying, data_type character varying DEFAULT 'R'::character varying, log_base numeric DEFAULT 2, currentjobid numeric DEFAULT 0)
   RETURNS numeric 
   LANGUAGE plpgsql SECURITY DEFINER
   AS $$
@@ -300,7 +300,7 @@ BEGIN
 		  ,current_timestamp
 		  ,x.sourcesystem_cd
 	from (select distinct 'Unknown' as sex_cd,
-				 0 as age_in_years_num,
+				 null::integer as age_in_years_num,
 				 null as race_cd,
 				 regexp_replace(TrialID || ':' || coalesce(s.site_id,'') || ':' || s.subject_id,'(::){1,}', ':', 'g') as sourcesystem_cd
 		 from tm_lz.lt_src_mrna_subj_samp_map s
@@ -805,7 +805,7 @@ BEGIN
 	--	insert any site/subject/samples that are not in de_subject_sample_mapping
 
 	begin
-	insert into de_subject_sample_mapping
+	insert into deapp.de_subject_sample_mapping
 	(patient_id
 	,site_id
 	,subject_id

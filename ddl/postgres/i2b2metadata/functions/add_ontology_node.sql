@@ -57,7 +57,7 @@ BEGIN
       
       is_leaf := 'LA';
       
-      PERFORM prefix||nextval('seq_i2b2_data_id')
+      select prefix||nextval('seq_i2b2_data_id')
       into concept_code ;
       
       --is_number :='&is_number';
@@ -80,7 +80,7 @@ BEGIN
     RAISE NOTICE 'node type: %, data type: %, concept code: %', is_leaf, data_type, concept_code;
   
 ------------------------------------------------------------
--- obtail the proper level for the node by finding the 
+-- obtain the proper level for the node by finding the
 -- level of its parent and adding one.
 ------------------------------------------------------------
     select c_hlevel+1 into hlevel

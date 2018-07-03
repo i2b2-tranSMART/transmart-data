@@ -1,10 +1,13 @@
 KETTLE_VERSION=4.4.0
-TRANSMART_RELEASE_BRANCH=release-16.1
+TRANSMART_RELEASE_BRANCH=release-16.3
 
-UBUNTU_PACKAGES=postgresql make git rsync libcairo-dev php5-cli php5-json curl \
-				tar openjdk-7-jdk gfortran g++ unzip libreadline-dev \
+UBUNTU_PACKAGES=postgresql make git rsync libcairo-dev curl \
+				tar gfortran g++ unzip libreadline-dev \
 				libxt-dev libpango1.0-dev libprotoc-dev \
 				texlive-fonts-recommended tex-gyre liblz4-tool pv zip
+
+UBUNTU14_PACKAGES=php5-cli php5-json openjdk-7-jdk
+UBUNTU16_PACKAGES=php7.0-cli php7.0-json
 
 GROOVY_VERSION=2.1.9
 
@@ -85,13 +88,21 @@ $(PHP_BIN): $(PHP_SRCDIR)/.keep
 php: $(PHP_BIN)
 	ln -s $< $@
 
-install_ubuntu_packages:
+install_ubuntu_packages14:
 	. /etc/lsb-release; \
-		test $$DISTRIB_RELEASE != '12.04' || \
+		test $$DISTRIB_RELEASE != '16.04' || \
 	    grep ondrej/php5 /etc/apt/sources.list || ( \
 				gpg --recv-keys --keyserver keyserver.ubuntu.com $(ONDREJ_KEY) && \
 				(gpg -a --export $(ONDREJ_KEY) | apt-key add -) && \
 				echo 'deb http://ppa.launchpad.net/ondrej/php5/ubuntu precise main' >> /etc/apt/sources.list)
+	apt-get update
+	apt-get install -y $(UBUNTU14_PACKAGES)
+
+install_ubuntu_packages16:
+	apt-get update
+	apt-get install -y $(UBUNTU16_PACKAGES)
+
+install_ubuntu_packages:
 	apt-get update
 	apt-get install -y $(UBUNTU_PACKAGES)
 
@@ -100,12 +111,13 @@ update_repos = if [ ! -d $(1) ]; then \
 	git clone -b $(3) '$(2)' $(1); \
 	else cd $(1) && git pull; fi
 
-# Note: in the release case - we are making a strong assumption that tramSMART-ETL
+# Note: in the release case - we are making a strong assumption that tranSMART-ETL
 #   already exists, is NOT a git archive, and can not be updated
-#update_etl:
-#	$(call update_repos,tranSMART-ETL,https://github.com/tranSMART-Foundation/tranSMART-ETL.git,$(TRANSMART_RELEASE_BRANCH))
 update_etl:
 	echo "for release build tranSMART-ETL is not automatically updated from git, because it is assumed to be already loaded from a zip file"
+
+update_etl_git:
+	$(call update_repos,tranSMART-ETL,https://github.com/tranSMART-Foundation/tranSMART-ETL.git,$(TRANSMART_RELEASE_BRANCH))
 .PHONY: update_repos, $(TRANSMART_LOADER)-from-file-server, $(TRANSMART_LOADER)-latest-bamboo-snapshot
 
 KETTLE_ARCHIVE=pdi-ce-$(KETTLE_VERSION)-stable.tar.gz
@@ -130,7 +142,7 @@ data-integration/.keep: $(KETTLE_ARCHIVE)
 	php -d variables_order=E $< > $@
 
 ubuntu_deps_root: install_ubuntu_packages /var/lib/postgresql/tablespaces
-# Note: in the release case - we are making a strong assumption that tramSMART-ETL
+# Note: in the release case - we are making a strong assumption that tranSMART-ETL
 #   already exists, is NOT a git archive, and can not be updated
 # ubuntu_deps_regular: update_etl data-integration ../vars groovy
 ubuntu_deps_regular: data-integration ../vars groovy

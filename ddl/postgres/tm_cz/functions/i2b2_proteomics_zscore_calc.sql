@@ -61,12 +61,12 @@ BEGIN
 		stepCt := stepCt + 1;
 		get diagnostics rowCt := ROW_COUNT;
 		select cz_write_audit(jobId,databaseName,procedureName,'Invalid runType passed - procedure exiting',rowCt,stepCt,'Done') into rtnCd;
-		select cz_error_handler (jobID, procedureName) into rtnCd;  
+		select cz_error_handler(jobId, procedureName, SQLSTATE, SQLERRM) into rtnCd;  
 		select cz_end_audit (jobID, 'FAIL') into rtnCd;
 		return 150;
 	end if;
   
---	For Load, make sure that the TrialId passed as parameter is the same as the trial in stg_subject_proteomics_data
+--	For Load, make sure that the TrialId passed as parameter is the same as the trial in WT_SUBJECT_PROTEOMICS_PROBESET
 --	If not, raise exception
 
 	if runType = 'L' then
@@ -77,7 +77,7 @@ BEGIN
 			stepCt := stepCt + 1;
 			get diagnostics rowCt := ROW_COUNT;
 			select cz_write_audit(jobId,databaseName,procedureName,'TrialId not the same as trial in WT_SUBJECT_PROTEOMICS_PROBESET - procedure exiting',rowCt,stepCt,'Done') into rtnCd;
-			select cz_error_handler(jobID, procedureName) into rtnCd;
+			select cz_error_handler(jobId, procedureName, SQLSTATE, SQLERRM) into rtnCd;
 			select cz_end_audit (jobID, 'FAIL') into rtnCd;
 			return 161;
 		end if;
@@ -160,7 +160,7 @@ BEGIN
 
 	stepCt := stepCt + 1;
 	get diagnostics rowCt := ROW_COUNT;
-	select cz_write_audit(jobId,databaseName,procedureName,'Loaded data for trial in TM_WZ wt_subject_mirna_logs',rowCt,stepCt,'Done') into rtnCd;
+	select cz_write_audit(jobId,databaseName,procedureName,'Loaded data for trial in TM_WZ.wt_subject_proteomics_logs',rowCt,stepCt,'Done') into rtnCd;
 
 	
     

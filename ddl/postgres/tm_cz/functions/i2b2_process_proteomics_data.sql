@@ -1,8 +1,7 @@
 --
 -- Name: i2b2_process_proteomics_data(character varying, character varying, character varying, character varying, numeric, character varying, numeric); Type: FUNCTION; Schema: tm_cz; Owner: -
 --
-SET search_path = tm_cz, pg_catalog;
-CREATE OR REPLACE FUNCTION i2b2_process_proteomics_data(trial_id character varying, top_node character varying, data_type character varying DEFAULT 'R'::character varying, source_cd character varying DEFAULT 'STD'::character varying, log_base numeric DEFAULT 2, secure_study character varying DEFAULT NULL::character varying, currentjobid numeric DEFAULT NULL::numeric) RETURNS numeric
+CREATE FUNCTION i2b2_process_proteomics_data(trial_id character varying, top_node character varying, data_type character varying DEFAULT 'R'::character varying, source_cd character varying DEFAULT 'STD'::character varying, log_base numeric DEFAULT 2, secure_study character varying DEFAULT NULL::character varying, currentjobid numeric DEFAULT NULL::numeric) RETURNS numeric
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
 /*************************************************************************
@@ -35,7 +34,6 @@ Declare
   gplTitle		character varying(1000);
   pExists		numeric;
   partTbl   	numeric;
-  partExists 	numeric;
   sampleCt		numeric;
   idxExists 	numeric;
   logBase		numeric;
@@ -257,7 +255,7 @@ BEGIN
 		  ,now()
 		  ,x.sourcesystem_cd
 	from (select distinct 'Unknown' as sex_cd,
-				 0 as age_in_years_num,
+				 null::integer as age_in_years_num,
 				 null as race_cd,
 				 regexp_replace(TrialID || ':' || coalesce(s.site_id,'') || ':' || s.subject_id,'(::){1,}', ':', 'g') as sourcesystem_cd
 		 from LT_SRC_PROTEOMICS_SUB_SAM_MAP s
@@ -305,38 +303,6 @@ BEGIN
 	get diagnostics rowCt := ROW_COUNT;
 	select cz_write_audit(jobId,databaseName,procedureName,'Delete data from observation_fact',rowCt,stepCt,'Done') into rtnCd;
 
-	begin
-	delete from DE_SUBJECT_PROTEIN_DATA
-	where trial_name = TrialId ;
-	exception
-	when others then
-		perform tm_cz.cz_error_handler (jobID, procedureName, SQLSTATE, SQLERRM);
-		perform tm_cz.cz_end_audit (jobID, 'FAIL');
-		return -16;
-	end;
-	
-	stepCt := stepCt + 1;
-	get diagnostics rowCt := ROW_COUNT;
-	select cz_write_audit(jobId,databaseName,procedureName,'Delete data from DE_SUBJECT_PROTEIN_DATA',rowCt,stepCt,'Done') into rtnCd;
-		
-	--	Cleanup any existing data in de_subject_sample_mapping.  
-
-	begin
-	delete from DE_SUBJECT_SAMPLE_MAPPING ssm
-	where trial_name = TrialID 
-	  and coalesce(ssm.source_cd,'STD') = sourceCd
-	  and platform = 'PROTEIN'
-	; --Making sure only proteomics data is deleted
-	exception
-	when others then
-		perform tm_cz.cz_error_handler (jobID, procedureName, SQLSTATE, SQLERRM);
-		perform tm_cz.cz_end_audit (jobID, 'FAIL');
-		return -16;
-	end;
-		  
-	stepCt := stepCt + 1;
-	get diagnostics rowCt := ROW_COUNT;
-	select cz_write_audit(jobId,databaseName,procedureName,'Delete trial from DEAPP de_subject_sample_mapping',rowCt,stepCt,'Done') into rtnCd;
 	begin
 	execute('truncate table tm_wz.WT_PROTEOMICS_NODES');
 	execute('truncate table tm_wz.WT_PROTEOMICS_NODE_VALUES');
@@ -435,6 +401,8 @@ BEGIN
           ,case when instr(substr(category_cd,1,instr(category_cd,'PLATFORM')+8),'ATTR2') > 1 then attribute_2 else null end as attribute_2
 		  ,'PLATFORM'
 	from  WT_PROTEOMICS_NODE_VALUES;
+--	where category_cd like '%PLATFORM%'
+--	  and platform is not null;
 	exception
 	when others then
 		perform tm_cz.cz_error_handler (jobID, procedureName, SQLSTATE, SQLERRM);
@@ -619,7 +587,7 @@ BEGIN
   --TIMEPOINT_CD	= concept_cd from ATTR2 records in wt_proteomics_nodes
   --TISSUE_TYPE     = attribute_1
   --TISSUE_TYPE_CD  = concept_cd from ATTR1 records in wt_proteomics_nodes
-  --PLATFORM        = PROTEOMICS - this is required by ui code
+  --PLATFORM        = PROTEIN - this is required by ui code
   --PLATFORM_CD     = concept_cd from PLATFORM records in wt_proteomics_nodes
   --DATA_UID		= concatenation of concept_cd-patient_num
   --GPL_ID			= platform from wt_subject_proteomics_data
@@ -986,6 +954,7 @@ BEGIN
 	end;
 	
 	--	note: assay_id represents a unique subject/site/sample
+
 
 	begin
 	insert into WT_SUBJECT_PROTEOMICS_PROBESET  --mod

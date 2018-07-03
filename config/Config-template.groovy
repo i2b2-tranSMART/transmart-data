@@ -40,10 +40,16 @@ ui {
             dataExportJobs.hide = false
             // Note: by default the analysisJobs panel is NOT shown
             // Currently, it is only used in special cases
-            analysisJobs.show = false
+            analysisJobs.hide = true
             workspace.hide = false
         }
     }
+    /*
+    //The below disclaimer appears on the login screen, just below the login button.
+    loginScreen {
+        disclaimer = "Please be aware that tranSMART is a data-integration tool that allows for exploration of available study data. The information shown in tranSMART, and derived from performed analyses, are for research purposes only. NOT for decision making in e.g. clinical trial studies."
+    }
+    */
 }
 
 // I001 – Insertion point 'post-WAR-variables'
@@ -56,9 +62,9 @@ ui {
  */
 
 /* If you want to be able to regenerate this file easily, instead of editing
- * the generated file directly, create a Config-extra.groovy file in the root of
- * the transmart-data checkout. That file will be appended to this one whenever
- * the Config.groovy target is run */
+ * the generated file directly, create a Config-extra.php file in the config
+ * directory of the transmart-data checkout. That file will be appended to
+ * this one whenever the Config.groovy target is run */
 
 environments { production {
     if (transmartURL.startsWith('http://localhost:')) {
@@ -127,7 +133,7 @@ environments {
 // This is the value that will appear in the To: entry of the e-mail popup 
 // that is displayed when the user clicks the Email administrator button,
 // on the GWAS plugin Data Upload page
-com.recomdata.dataUpload.adminEmail = 'No data upload adminEmail value set - contact site administrator'
+com.recomdata.dataUpload.adminEmail = "transmart-discuss@googlegroups.com"
 /* }}} */
 
 /* {{{ Personalization */
@@ -156,9 +162,16 @@ environments { development {
 } }
 
 // Keys without defaults (see Config-extra.php.sample):
-// com.recomdata.projectName
-// com.recomdata.providerName
-// com.recomdata.providerURL
+// name and URL of the supporter entity shown on the welcome page
+// com.recomdata.providerName = "tranSMART Foundation"
+// com.recomdata.providerURL = "http://www.transmartfoundation.org"
+// com.recomdata.providerLogo = "/transmart/static/images/transmartlogo.jpg"
+
+// name and URL and logo of the project
+// shown on the login page
+// com.recomdata.projectName = "My project"
+// com.recomdata.projectURL = "http://myproject.org/"
+// com.recomdata.projectLogo = "/myprojectbanner.jpg"
 /* }}} */
 
 /* {{{ Login */
@@ -279,13 +292,13 @@ com.recomdata.dataUpload.appTitle="Upload data to tranSMART"
 com.recomdata.dataUpload.stageScript="run_analysis_stage"
 
 // Directory path of com.recomdata.dataUpload.stageScript
-def gwasEtlDirectory = new File(System.getenv('HOME'), '.grails/transmart-gwasetl')
+def gwasEtlDirectory = new File(System.getProperty("user.home"), '.grails/transmart-gwasetl')
 
 // Directory to hold GWAS file uploads
-def gwasUploadsDirectory = new File(System.getenv('HOME'), '.grails/transmart-datauploads')
+def gwasUploadsDirectory = new File(System.getProperty("user.home"), '.grails/transmart-datauploads')
 
 // Directory to preload with template files with names <type>-template.txt
-def gwasTemplatesDirectory = new File(System.getenv('HOME'), '.grails/transmart-templates')
+def gwasTemplatesDirectory = new File(System.getProperty("user.home"), '.grails/transmart-templates')
 
 com.recomdata.dataUpload.templates.dir = gwasTemplatesDirectory.absolutePath
 com.recomdata.dataUpload.uploads.dir = gwasUploadsDirectory.absolutePath
@@ -296,6 +309,13 @@ com.recomdata.dataUpload.etl.dir = gwasEtlDirectory.absolutePath
         it.mkdir()
     }
 }
+
+/* }}} */
+
+/* {{{ GWAS plink */
+
+grails.plugin.transmartGwasPlink.enabled=false
+grails.plugin.transmartGwasPlink.plinkPath="/usr/lib/plink.plink"
 
 /* }}} */
 
@@ -338,7 +358,7 @@ grails { plugin { springsecurity {
     requestMap.className = 'org.transmart.searchapp.Requestmap'
     // requestmap in db
     securityConfigType = grails.plugin.springsecurity.SecurityConfigType.Requestmap
-    // url to redirect after login in
+    // url to redirect after login
     // just_rest branch provides alternative default via org.transmart.defaultLoginRedirect
     successHandler.defaultTargetUrl = org.transmart.defaultLoginRedirect ?: '/userLanding'
     // logout url
@@ -386,6 +406,9 @@ grails { plugin { springsecurity {
             '/userGroup/**'               : ['ROLE_ADMIN'],
             '/secureObjectAccess/**'      : ['ROLE_ADMIN'],
             '/oauthAdmin/**'              : ['ROLE_ADMIN'],
+//            '/buildInfo/**'               : ['ROLE_ADMIN'],
+            '/configInfo/**'              : ['ROLE_ADMIN'],
+//            '/statusInfo/**'              : ['ROLE_ADMIN'],
             *                             : (oauthEnabled ?  oauthEndpoints : [:]),
             *                             : (gwavaEnabled ?  gwavaMappings : [:]),
             '/**'                         : ['IS_AUTHENTICATED_REMEMBERED'], // must be last
@@ -429,6 +452,7 @@ grails { plugin { springsecurity {
                 '/observations/**': securedResourcesFilters,
                 '/patient_sets/**': securedResourcesFilters,
                 '/oauth/inspectToken': securedResourcesFilters,
+                '/transmart-rest-api-version': 'none',
                 '/**': [
                         'JOINED_FILTERS',
                         '-statelessSecurityContextPersistenceFilter',
@@ -590,17 +614,21 @@ if (samlEnabled) {
 /* {{{ gwava */
 if (gwavaEnabled) {
     // assume deployment alongside transmart
-    com { recomdata { rwg { webstart {
-        def url       = new URL(transmartURL)
-        codebase      = "$url.protocol://$url.host${url.port != -1 ? ":$url.port" : ''}/gwava"
-        jar           = './ManhattanViz2.1g.jar'
-        mainClass     = 'com.pfizer.mrbt.genomics.Driver'
-        gwavaInstance = 'transmartstg'
-        transmart.url = transmartURL - ~'\\/$'
-   } } } }
-   com { recomdata { rwg { qqplots {
-       cacheImages = new File(jobsDirectory, 'cachedQQplotImages').toString()
-   } } } }
+    com { recomdata { rwg {
+        webstart {
+            def url       = new URL(transmartURL)
+            codebase      = "$url.protocol://$url.host${url.port != -1 ? ":$url.port" : ''}/gwava"
+            jar           = './ManhattanViz2.1g.jar'
+            mainClass     = 'com.pfizer.mrbt.genomics.Driver'
+            gwavaInstance = 'transmartstg'
+            transmart.url = transmartURL - ~'\\/$'
+        }
+        qqplots {
+            cacheImages = new File(jobsDirectory, 'cachedQQplotImages').toString()
+        }
+        manhattanplots {
+            cacheImages = new File(jobsDirectory, 'cachedManhattanplotImages').toString()
+    } } } }
 }
 /* }}} */
 
@@ -619,7 +647,7 @@ com.rwg.solr.update.path = '/solr/browse/dataimport/'
 com.recomdata.solr.baseURL = "${com.rwg.solr.scheme}://${com.rwg.solr.host}" +
                              "${new File(com.rwg.solr.browse.path).parent}"
 
-def fileStoreDirectory = new File(System.getenv('HOME'), '.grails/transmart-filestore')
+def fileStoreDirectory = new File(System.getProperty("user.home"), '.grails/transmart-filestore')
 def fileImportDirectory = new File(System.getProperty("java.io.tmpdir"), 'transmart-fileimport')
 com.recomdata.FmFolderService.filestoreDirectory = fileStoreDirectory.absolutePath
 com.recomdata.FmFolderService.importDirectory = fileImportDirectory.absolutePath
@@ -664,6 +692,34 @@ com { recomdata { solr {
     maxNewsStories = 10
     maxRows = 10000
 }}}
+
+/* }}} */
+
+/* {{{ Metacore analytics */
+
+com.thomsonreuters.transmart.metacoreAnalyticsEnable = false
+/* with no other settings defined, these URLs are used.
+ The demoEnrichmentURL default in the 16.1 metacore plugin code
+ is obsolete so the correct URL must be defined here. */
+com.thomsonreuters.transmart.demoEnrichmentURL = "http://pathwaymaps.com"
+com.thomsonreuters.transmart.demoMapBaseURL = "http://pathwaymaps.com/maps/"
+
+/* this value is defined automatically to 'demo', 'system' or 'user' */
+//com.thomsonreuters.transmart.metacoreSettingsMode = "demo"
+
+/* these settings are used to override the demo settings */
+//com.thomsonreuters.transmart.metacoreURL = "http://localhost/"
+//com.thomsonreuters.transmart.metacoreDefaultLogin = ""
+//com.thomsonreuters.transmart.metacoreDefaultPassword = ""
+//com.thomsonreuters.transmart.metacoreLogin = ""
+//com.thomsonreuters.transmart.metacorePassword = ""
+
+/* }}} */
+
+/* {{{ galaxy plugin (blend4j) */
+
+com.galaxy.blend4j.galaxyEnabled = false
+com.galaxy.blend4j.galaxyURL = "http://usegalaxy.org/"
 
 /* }}} */
 

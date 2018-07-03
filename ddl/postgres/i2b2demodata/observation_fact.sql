@@ -11,7 +11,7 @@ CREATE TABLE observation_fact (
     instance_num numeric(18,0),
     valtype_cd character varying(50),
     tval_char character varying(255),
-    nval_num numeric(18,5),
+    nval_num numeric,
     valueflag_cd character varying(50),
     quantity_num numeric(18,5),
     units_cd character varying(50),
@@ -76,7 +76,7 @@ CREATE TRIGGER trg_encounter_num BEFORE INSERT ON observation_fact FOR EACH ROW 
 -- Name: seq_encounter_num; Type: SEQUENCE; Schema: i2b2demodata; Owner: -
 --
 CREATE SEQUENCE seq_encounter_num
-    START WITH 49814595
+    START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE

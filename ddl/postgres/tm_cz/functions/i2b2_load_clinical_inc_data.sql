@@ -1,7 +1,7 @@
 --
 -- Name: i2b2_load_clinical_inc_data(character varying, character varying, character varying, character varying, numeric); Type: FUNCTION; Schema: tm_cz; Owner: -
 --
-CREATE FUNCTION i2b2_load_clinical_inc_data(trial_id character varying, top_node character varying, secure_study character varying DEFAULT 'N'::character varying, highlight_study character varying DEFAULT 'N'::character varying, currentjobid numeric DEFAULT (-1)) RETURNS numeric
+CREATE FUNCTION i2b2_load_clinical_inc_data(trial_id character varying, top_node character varying, secure_study character varying DEFAULT 'N'::character varying, highlight_study character varying DEFAULT 'N'::character varying, currentjobid numeric DEFAULT 0) RETURNS numeric
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
 /*
@@ -777,7 +777,7 @@ BEGIN
 				   then case when tm_cz.is_numeric(a.data_value) = 1 then null else round(a.data_value::numeric) end
 		           when upper(a.data_label) like '%(AGE)' 
 				   then case when tm_cz.is_numeric(a.data_value) = 1 then null else round(a.data_value::numeric) end
-				   else null end) as age,
+				   else null::integer end) as age,
 		  max(case when upper(a.data_label) = 'SEX' then a.data_value
 		           when upper(a.data_label) like '%(SEX)' then a.data_value
 				   when upper(a.data_label) = 'GENDER' then a.data_value

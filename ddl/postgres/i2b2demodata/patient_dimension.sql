@@ -9,7 +9,7 @@ CREATE TABLE patient_dimension (
     sex_cd character varying(50),
     age_in_years_num numeric(38,0),
     language_cd character varying(50),
-    race_cd character varying(50),
+    race_cd character varying(100),
     marital_status_cd character varying(50),
     religion_cd character varying(50),
     zip_cd character varying(50),
@@ -77,7 +77,7 @@ CREATE TRIGGER trg_patient_dimension BEFORE INSERT ON patient_dimension FOR EACH
 -- Name: seq_patient_num; Type: SEQUENCE; Schema: i2b2demodata; Owner: -
 --
 CREATE SEQUENCE seq_patient_num
-    START WITH 1000384597
+    START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE

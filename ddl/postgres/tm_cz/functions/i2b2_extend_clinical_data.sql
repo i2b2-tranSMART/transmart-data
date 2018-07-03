@@ -1,7 +1,7 @@
 --
 -- Name: i2b2_extend_clinical_data(character varying, character varying, character varying, character varying, numeric); Type: FUNCTION; Schema: tm_cz; Owner: -
 --
-CREATE FUNCTION i2b2_extend_clinical_data(trial_id character varying, top_node character varying, secure_study character varying DEFAULT 'N'::character varying, highlight_study character varying DEFAULT 'N'::character varying, currentjobid numeric DEFAULT (-1)) RETURNS numeric
+CREATE FUNCTION i2b2_extend_clinical_data(trial_id character varying, top_node character varying, secure_study character varying DEFAULT 'N'::character varying, highlight_study character varying DEFAULT 'N'::character varying, currentjobid numeric DEFAULT 0) RETURNS numeric
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
 /*************************************************************************
@@ -771,10 +771,10 @@ BEGIN
     )
 	select a.usubjid,
 	      coalesce(max(case when upper(a.data_label) = 'AGE'
-					   then case when tm_cz.is_numeric(a.data_value) = 1 then 0 else a.data_value::integer end
+					   then case when tm_cz.is_numeric(a.data_value) = 1 then null else round(a.data_value::numeric) end
 		               when upper(a.data_label) like '%(AGE)' 
-					   then case when tm_cz.is_numeric(a.data_value) = 1 then 0 else a.data_value::integer end
-					   else null end),0) as age,
+					   then case when tm_cz.is_numeric(a.data_value) = 1 then null else round(a.data_value::numeric) end
+					   else null::integer end),null:integer) as age,
 		  coalesce(max(case when upper(a.data_label) = 'SEX' then a.data_value
 		           when upper(a.data_label) like '%(SEX)' then a.data_value
 				   when upper(a.data_label) = 'GENDER' then a.data_value
